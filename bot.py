@@ -1,12 +1,23 @@
 import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+from telegram.ext import (
+    ApplicationBuilder,
+    MessageHandler,
+    CommandHandler,
+    ContextTypes,
+    filters,
+)
 import config
 
 ANTI_SPAM = [
     "t.me/","telegram.me/","joinchat",
     "onlyfans","crypto","btc","usdt","binance","porn","sex"
 ]
+from giveaway import (
+    open_giveaway,
+    close_giveaway,
+    tickets,
+)
 
 async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
@@ -80,6 +91,10 @@ app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
 app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
+
+app.add_handler(CommandHandler("opengiveaway", open_giveaway))
+app.add_handler(CommandHandler("closegiveaway", close_giveaway))
+app.add_handler(CommandHandler("tickets", tickets))
 
 print("PingPokeBot running...")
 app.run_polling()
