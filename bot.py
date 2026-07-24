@@ -53,6 +53,28 @@ async def anti_spam(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.delete()
         except:
             pass
+            
+# ===============================
+# GIVEAWAY SYSTEM
+# ===============================
+
+# database setup
+
+# /opengiveaway
+
+# /closegiveaway
+
+# /tickets
+
+# /list
+
+# /export
+
+# callback button
+
+# claim ticket
+
+# ===============================
 
 app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
