@@ -11,6 +11,7 @@ from database import (
     open_giveaway,
     close_giveaway,
     create_ticket,
+    has_ticket,
     ticket_count,
 )
 
