@@ -99,5 +99,10 @@ app.add_handler(CommandHandler("opengiveaway", open_giveaway))
 app.add_handler(CommandHandler("closegiveaway", close_giveaway))
 app.add_handler(CommandHandler("tickets", tickets))
 
+async def error_handler(update, context):
+    print("ERROR:", context.error)
+
+app.add_error_handler(error_handler)
+
 print("PingPokeBot running...")
-app.run_polling()
+app.run_polling(drop_pending_updates=True)
