@@ -177,3 +177,5 @@ def all_tickets():
     conn.close()
 
     return rows
+    
+init_db()
