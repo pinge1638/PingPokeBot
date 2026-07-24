@@ -94,6 +94,7 @@ app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 
+app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
 app.add_handler(CommandHandler("closegiveaway", close_giveaway))
 app.add_handler(CommandHandler("tickets", tickets))
