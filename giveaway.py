@@ -8,8 +8,8 @@ from telegram.constants import ParseMode
 
 from database import (
     is_giveaway_open,
-    open_giveaway,
-    close_giveaway,
+    open_giveaway as db_open_giveaway,
+    close_giveaway as db_close_giveaway,
     create_ticket,
     has_ticket,
     ticket_count,
