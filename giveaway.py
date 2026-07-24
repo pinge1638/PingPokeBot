@@ -56,18 +56,6 @@ async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# ----------------------------
-# /tickets
-# ----------------------------
-async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    close_giveaway_db()
-
-    await update.message.reply_text(
-        "🔒 Giveaway Closed!\n\n"
-        "No more ticket claims are accepted."
-    )
-
 
 # ----------------------------
 # /tickets
