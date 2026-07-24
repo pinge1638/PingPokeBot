@@ -21,6 +21,10 @@ from giveaway import (
     start,
 )
 
+async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("PING command received")
+    await update.message.reply_text("Pong!")
+
 async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
@@ -89,11 +93,16 @@ async def anti_spam(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ===============================
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
 app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 
+app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
 app.add_handler(CommandHandler("closegiveaway", close_giveaway))
@@ -105,4 +114,8 @@ async def error_handler(update, context):
 app.add_error_handler(error_handler)
 
 print("PingPokeBot running...")
-app.run_polling(drop_pending_updates=True)
+app.run_polling(
+    drop_pending_updates=True,
+    allowed_updates=Update.ALL_TYPES,
+    poll_interval=1,
+)
