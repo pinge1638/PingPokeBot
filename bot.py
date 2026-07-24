@@ -13,10 +13,12 @@ ANTI_SPAM = [
     "t.me/","telegram.me/","joinchat",
     "onlyfans","crypto","btc","usdt","binance","porn","sex"
 ]
+
 from giveaway import (
     open_giveaway,
     close_giveaway,
     tickets,
+    start,
 )
 
 async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
