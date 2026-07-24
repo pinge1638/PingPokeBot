@@ -21,9 +21,12 @@ BOT_USERNAME = "PingPoke_bot"   # Change if your bot username changes
 # ----------------------------
 # /opengiveaway
 # ----------------------------
+# ----------------------------
+# /opengiveaway
+# ----------------------------
 async def open_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    open_giveaway()
+    open_giveaway_db()
 
     keyboard = [
         [
@@ -46,9 +49,12 @@ async def open_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ----------------------------
 # /closegiveaway
 # ----------------------------
+# ----------------------------
+# /closegiveaway
+# ----------------------------
 async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    close_giveaway()
+    close_giveaway_db()
 
     await update.message.reply_text(
         "🔒 Giveaway Closed!\n\n"
@@ -61,7 +67,7 @@ async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ----------------------------
 async def tickets(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-   total = ticket_count()
+     total = ticket_count()
 
     status = "🟢 OPEN" if is_giveaway_open() else "🔴 CLOSED"
 
@@ -69,4 +75,37 @@ async def tickets(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🎟 Giveaway Statistics\n\n"
         f"Status: {status}\n"
         f"Tickets Claimed: {total}"
+    )
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # Only handle /start giveaway
+    if not context.args or context.args[0] != "giveaway":
+        await update.message.reply_text(
+            "👋 Welcome to PingPoke Bot!"
+        )
+        return
+
+    if not is_giveaway_open():
+        await update.message.reply_text(
+            "❌ The giveaway is currently closed."
+        )
+        return
+
+    existing = has_ticket(update.effective_user.id)
+
+    if existing:
+        await update.message.reply_text(
+            f"🎟 You already have Ticket #{existing[0]:03d}"
+        )
+        return
+
+    ticket = create_ticket(update.effective_user)
+
+    await update.message.reply_text(
+        f"""🎉 Giveaway Registration Successful!
+
+🎟 Your Ticket Number: #{ticket:03d}
+
+Good luck! 🍀"""
     )
