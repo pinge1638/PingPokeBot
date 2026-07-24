@@ -33,7 +33,7 @@ def init_db():
     conn.close()
 
 
-def is_giveaway_open():
+def set_giveaway_open():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -62,7 +62,7 @@ def open_giveaway():
     conn.close()
 
 
-def close_giveaway():
+def set_giveaway_closed():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
