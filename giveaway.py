@@ -21,12 +21,9 @@ BOT_USERNAME = "PingPoke_bot"   # Change if your bot username changes
 # ----------------------------
 # /opengiveaway
 # ----------------------------
-# ----------------------------
-# /opengiveaway
-# ----------------------------
 async def open_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    open_giveaway_db()
+    db_open_giveaway()
 
     keyboard = [
         [
@@ -49,8 +46,18 @@ async def open_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ----------------------------
 # /closegiveaway
 # ----------------------------
+async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    db_close_giveaway()
+
+    await update.message.reply_text(
+        "🔒 Giveaway Closed!\n\n"
+        "No more ticket claims are accepted."
+    )
+
+
 # ----------------------------
-# /closegiveaway
+# /tickets
 # ----------------------------
 async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
