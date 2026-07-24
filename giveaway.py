@@ -3,7 +3,7 @@ from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
 from database import (
@@ -57,12 +57,13 @@ async def close_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+
 # ----------------------------
 # /tickets
 # ----------------------------
 async def tickets(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-     total = ticket_count()
+    total = ticket_count()
 
     status = "🟢 OPEN" if is_giveaway_open() else "🔴 CLOSED"
 
