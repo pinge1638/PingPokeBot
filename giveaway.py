@@ -8,9 +8,10 @@ from telegram.constants import ParseMode
 
 from database import (
     is_giveaway_open,
-    set_giveaway_status,
+    open_giveaway,
+    close_giveaway,
     create_ticket,
-    get_ticket_count,
+    ticket_count,
 )
 
 BOT_USERNAME = "PingPoke_bot"   # Change if your bot username changes
