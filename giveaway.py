@@ -74,6 +74,39 @@ async def tickets(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Tickets Claimed: {total}"
     )
 
+
+# ----------------------------
+# /list
+# ----------------------------
+async def list_entries(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    rows = all_tickets()
+
+    if not rows:
+        await update.message.reply_text(
+            "📭 No giveaway entries yet."
+        )
+        return
+
+    text = "🎟 Giveaway Entries\n\n"
+
+    for ticket, name, username, claimed_at in rows:
+
+        if username:
+            user = f"@{username}"
+        else:
+            user = "(No username)"
+
+        text += (
+            f"#{ticket:03d} • {name}\n"
+            f"{user}\n"
+            f"{claimed_at}\n\n"
+        )
+
+    text += f"👥 Total Entries: {len(rows)}"
+
+    await update.message.reply_text(text)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Only handle /start giveaway
