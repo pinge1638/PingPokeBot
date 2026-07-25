@@ -173,24 +173,5 @@ def ticket_count():
 
     return count
 
-
-def all_tickets():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT
-            ticket_number,
-            full_name,
-            username
-        FROM tickets
-        ORDER BY ticket_number
-    """)
-
-    rows = cursor.fetchall()
-
-    conn.close()
-
-    return rows
     
 init_db()
