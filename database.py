@@ -2,6 +2,21 @@ import sqlite3
 
 DB_NAME = "tickets.db"
 
+def all_tickets():
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT ticket_number, full_name, username, claimed_at
+        FROM tickets
+        ORDER BY ticket_number
+    """)
+
+    rows = cur.fetchall()
+    conn.close()
+
+    return rows
+
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
