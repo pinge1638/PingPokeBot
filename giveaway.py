@@ -5,6 +5,7 @@ from telegram import (
 )
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
+import config
 
 from database import (
     is_giveaway_open,
@@ -80,6 +81,12 @@ async def tickets(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ----------------------------
 async def list_entries(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    if update.effective_user.id != config.OWNER_ID:
+    await update.message.reply_text(
+        "⛔ This command is only available to the giveaway organizer."
+    )
+    return
+
     rows = all_tickets()
 
     if not rows:
@@ -105,7 +112,14 @@ async def list_entries(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text += f"👥 Total Entries: {len(rows)}"
 
-    await update.message.reply_text(text)
+    await context.bot.send_message(
+    chat_id=config.OWNER_ID,
+    text=text
+    )
+
+    await update.message.reply_text(
+    "📬 I've sent the giveaway entries to your private chat."
+    )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
