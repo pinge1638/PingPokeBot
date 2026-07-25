@@ -108,6 +108,7 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
 app.add_handler(CommandHandler("closegiveaway", close_giveaway))
 app.add_handler(CommandHandler("tickets", tickets))
+app.add_handler(CommandHandler("list", list_entries))
 
 async def error_handler(update, context):
     print("ERROR:", context.error)
