@@ -47,3 +47,30 @@ async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown",
     )
+
+# ======================================
+# CALLBACK BUTTONS
+# ======================================
+
+async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "inventory":
+
+        keyboard = [
+            [InlineKeyboardButton("➕ Add Product", callback_data="add_product")],
+            [InlineKeyboardButton("📋 View Products", callback_data="view_products")],
+            [InlineKeyboardButton("✏️ Edit Product", callback_data="edit_product")],
+            [InlineKeyboardButton("➕ Add Stock", callback_data="add_stock")],
+            [InlineKeyboardButton("➖ Deduct Stock", callback_data="deduct_stock")],
+            [InlineKeyboardButton("🗑 Hide Product", callback_data="hide_product")],
+            [InlineKeyboardButton("⬅ Back", callback_data="back_admin")],
+        ]
+
+        await query.edit_message_text(
+            "📦 *Inventory Management*\n\nChoose an option.",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
