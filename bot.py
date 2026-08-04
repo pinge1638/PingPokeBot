@@ -1,4 +1,5 @@
 import asyncio
+from inventory import addproduct
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -102,7 +103,7 @@ app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
 app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
-
+app.add_handler(CommandHandler("addproduct", addproduct))
 app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
