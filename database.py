@@ -44,6 +44,19 @@ def init_db():
         VALUES ('giveaway_open', '0')
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id TEXT UNIQUE,
+            name TEXT,
+            category TEXT,
+            product_type TEXT,
+            price REAL,
+            stock INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1
+        )
+    """)
+
     conn.commit()
     conn.close()
 
