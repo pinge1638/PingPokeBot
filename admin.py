@@ -74,3 +74,23 @@ async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown",
         )
+
+
+    elif query.data == "back_admin":
+
+        keyboard = [
+            [InlineKeyboardButton("📦 Inventory", callback_data="inventory")],
+            [InlineKeyboardButton("🛒 Orders", callback_data="orders")],
+            [InlineKeyboardButton("🚢 Pre Orders", callback_data="preorders")],
+            [InlineKeyboardButton("💳 Payments", callback_data="payments")],
+            [InlineKeyboardButton("🎁 Giveaway", callback_data="giveaway")],
+            [InlineKeyboardButton("📊 Reports", callback_data="reports")],
+            [InlineKeyboardButton("⚙️ Settings", callback_data="settings")],
+        ]
+
+        await query.edit_message_text(
+            "🛠 *PingPoke Admin Panel*\n\n"
+            "Select a module below.",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
