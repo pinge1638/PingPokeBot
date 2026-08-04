@@ -185,6 +185,61 @@ def ticket_count():
     conn.close()
 
     return count
-
     
+# ==========================
+# PRODUCTS
+# ==========================
+
+def add_product(product_id, name, category, product_type, price, stock):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO products
+        (
+            product_id,
+            name,
+            category,
+            product_type,
+            price,
+            stock
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        product_id,
+        name,
+        category,
+        product_type,
+        price,
+        stock
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def get_products():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            product_id,
+            name,
+            category,
+            product_type,
+            price,
+            stock
+        FROM products
+        WHERE active = 1
+        ORDER BY category, name
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
+
+
 init_db()
