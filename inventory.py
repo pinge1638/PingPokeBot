@@ -66,7 +66,7 @@ async def product_description(update: Update, context: ContextTypes.DEFAULT_TYPE
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-    return CATEGORY
+    return ConversationHandler.WAITING
 
 
 async def skip_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -84,7 +84,7 @@ async def skip_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-    return CATEGORY
+    return ConversationHandler.WAITING
 
 async def category_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
