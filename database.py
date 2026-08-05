@@ -231,6 +231,7 @@ def get_products():
             name,
             category,
             product_type,
+            cost,
             price,
             stock
         FROM products
