@@ -245,5 +245,39 @@ def get_products():
 
     return rows
 
+def add_stock(product_id, quantity):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE products
+        SET stock = stock + ?
+        WHERE product_id = ?
+    """, (
+        quantity,
+        product_id
+    ))
+
+    conn.commit()
+    conn.close()
+
+def get_product(product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            product_id,
+            name,
+            stock
+        FROM products
+        WHERE product_id=?
+    """, (product_id,))
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    return row
 
 init_db()
