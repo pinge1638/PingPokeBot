@@ -165,6 +165,7 @@ async def product_stock(update: Update, context: ContextTypes.DEFAULT_TYPE):
         name=context.user_data["name"],
         category=context.user_data["category"],
         product_type=context.user_data["type"],
+        cost=context.user_data["cost"],
         price=context.user_data["price"],
         stock=context.user_data["stock"],
     )
