@@ -128,6 +128,10 @@ product_conv = ConversationHandler(
             CommandHandler("skip", skip_description),
             MessageHandler(filters.TEXT & ~filters.COMMAND, product_description),
         ],
+
+        ConversationHandler.WAITING: [
+            CallbackQueryHandler(category_buttons, pattern="^cat_"),
+        ],
     },
     fallbacks=[
         CommandHandler("cancel", cancel)
@@ -146,12 +150,7 @@ app.add_handler(
         pattern="^(inventory|orders|preorders|payments|giveaway|reports|settings|back_admin)$"
     )
 )
-app.add_handler(
-    CallbackQueryHandler(
-        category_buttons,
-        pattern="^cat_"
-    )
-)
+
 app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
