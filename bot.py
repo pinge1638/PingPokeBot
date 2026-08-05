@@ -117,6 +117,8 @@ from inventory import (
     cancel,
     NAME,
     DESCRIPTION,
+    CATEGORY,
+    TYPE,
     COST,
     PRICE,
     STOCK,
@@ -136,8 +138,11 @@ product_conv = ConversationHandler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, product_description),
         ],
 
-        ConversationHandler.WAITING: [
+        CATEGORY: [
             CallbackQueryHandler(category_buttons, pattern="^cat_"),
+        ],
+
+        TYPE: [
             CallbackQueryHandler(type_buttons, pattern="^type_"),
         ],
     
