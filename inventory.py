@@ -11,6 +11,12 @@ import config
 
 # Conversation States
 NAME = 0
+DESCRIPTION = 1
+CATEGORY = 2
+TYPE = 3
+COST = 4
+PRICE = 5
+STOCK = 6
 
 
 async def addproduct(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -35,10 +41,11 @@ async def product_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["name"] = update.message.text
 
     await update.message.reply_text(
-        f"✅ Product Name:\n{context.user_data['name']}"
+        "📝 Enter a description.\n\n"
+        "Type /skip if there isn't one."
     )
 
-    return ConversationHandler.END
+    return DESCRIPTION
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
