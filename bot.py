@@ -1,15 +1,16 @@
 import asyncio
 from admin import admin, admin_buttons
-from inventory import addproduct
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
     MessageHandler,
     CommandHandler,
     CallbackQueryHandler,
+    ConversationHandler,
     ContextTypes,
     filters,
 )
+
 import config
 
 ANTI_SPAM = [
@@ -103,11 +104,34 @@ logging.basicConfig(level=logging.INFO)
 
 app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
+from inventory import (
+    addproduct,
+    product_name,
+    cancel,
+    NAME,
+)
+
+product_conv = ConversationHandler(
+    entry_points=[
+        CommandHandler("addproduct", addproduct),
+    ],
+    states={
+        NAME: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, product_name)
+        ],
+    },
+    fallbacks=[
+        CommandHandler("cancel", cancel)
+    ],
+)
+
+
+
 app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
 app.add_handler(CallbackQueryHandler(admin_buttons))
-app.add_handler(CommandHandler("addproduct", addproduct))
+app.add_handler(product_conv)
 app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
