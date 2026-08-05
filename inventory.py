@@ -87,7 +87,7 @@ async def skip_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return CATEGORY
 
 async def category_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    print(">>> category_buttons")
     query = update.callback_query
     await query.answer()
 
@@ -115,7 +115,7 @@ async def category_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def type_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    print(">>> type_buttons")
     query = update.callback_query
     await query.answer()
 
@@ -135,7 +135,7 @@ async def type_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return COST
 
 async def product_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    print(">>> product_cost")
     print(">>> product_cost reached")
 
     context.user_data["cost"] = float(update.message.text)
