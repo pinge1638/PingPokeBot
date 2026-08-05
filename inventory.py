@@ -17,6 +17,7 @@ from database import (
     get_products,
     get_product,
     add_stock,
+    remove_stock,
 )
 # Conversation States
 NAME = 0
@@ -28,6 +29,8 @@ PRICE = 5
 STOCK = 6
 ADD_STOCK_SELECT = 7
 ADD_STOCK_AMOUNT = 8
+REMOVE_STOCK_SELECT = 9
+REMOVE_STOCK_AMOUNT = 10
 
 
 async def addproduct(update: Update, context: ContextTypes.DEFAULT_TYPE):
