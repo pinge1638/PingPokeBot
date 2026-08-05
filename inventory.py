@@ -12,7 +12,12 @@ from telegram.ext import (
 )
 
 import config
-from database import add_product, get_products
+from database import (
+    add_product,
+    get_products,
+    get_product,
+    add_stock,
+)
 # Conversation States
 NAME = 0
 DESCRIPTION = 1
@@ -21,6 +26,8 @@ TYPE = 3
 COST = 4
 PRICE = 5
 STOCK = 6
+ADD_STOCK_SELECT = 7
+ADD_STOCK_AMOUNT = 8
 
 
 async def addproduct(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -222,6 +229,85 @@ async def products(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text,
         parse_mode="Markdown",
     )
+
+async def addstock(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    rows = get_products()
+
+    if not rows:
+        await update.message.reply_text("📦 No products found.")
+        return ConversationHandler.END
+
+    keyboard = []
+
+    for product_id, name, *_ in rows:
+        keyboard.append([
+            InlineKeyboardButton(
+                name,
+                callback_data=f"stock_{product_id}"
+            )
+        ])
+
+    await update.message.reply_text(
+        "📦 Select a product:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+    return ADD_STOCK_SELECT
+
+async def addstock_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("stock_", "")
+
+    product = get_product(product_id)
+
+    if not product:
+        await query.edit_message_text("❌ Product not found.")
+        return ConversationHandler.END
+
+    context.user_data["stock_product"] = product_id
+
+    _, name, stock = product
+
+    await query.edit_message_text(
+        f"""📦 {name}
+
+Current Stock: {stock}
+
+➕ How many would you like to add?"""
+    )
+
+    return ADD_STOCK_AMOUNT
+
+async def addstock_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    quantity = int(update.message.text)
+
+    product_id = context.user_data["stock_product"]
+
+    product = get_product(product_id)
+
+    _, name, old_stock = product
+
+    add_stock(product_id, quantity)
+
+    new_stock = old_stock + quantity
+
+    await update.message.reply_text(
+        f"""✅ Stock Updated!
+
+📦 {name}
+
+Old Stock: {old_stock}
+Added: {quantity}
+
+New Stock: {new_stock}"""
+    )
+
+    return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
