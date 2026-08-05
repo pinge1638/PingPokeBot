@@ -12,7 +12,7 @@ from telegram.ext import (
 )
 
 import config
-
+from database import add_product
 # Conversation States
 NAME = 0
 DESCRIPTION = 1
@@ -160,7 +160,14 @@ async def product_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def product_stock(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["stock"] = int(update.message.text)
-
+    add_product(
+        product_id=context.user_data["name"].lower().replace(" ", "_"),
+        name=context.user_data["name"],
+        category=context.user_data["category"],
+        product_type=context.user_data["type"],
+        price=context.user_data["price"],
+        stock=context.user_data["stock"],
+    )
     await update.message.reply_text(
         f"""
 ✅ Product Created!
