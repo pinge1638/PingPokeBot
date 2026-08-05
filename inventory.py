@@ -1,4 +1,8 @@
-from telegram import Update
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
@@ -51,24 +55,63 @@ async def product_description(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     context.user_data["description"] = update.message.text
 
+    keyboard = [
+        [InlineKeyboardButton("🟡 Pokémon", callback_data="cat_pokemon")],
+        [InlineKeyboardButton("🏴‍☠️ One Piece", callback_data="cat_onepiece")],
+        [InlineKeyboardButton("🎁 Accessories", callback_data="cat_accessories")],
+    ]
+
     await update.message.reply_text(
-        "📂 Choose a category.\n\n"
-        "(We'll replace this with buttons next.)"
+        "📂 Choose a Category",
+        reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-    return ConversationHandler.END
+    return CATEGORY
 
 
 async def skip_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["description"] = ""
 
+    keyboard = [
+        [InlineKeyboardButton("🟡 Pokémon", callback_data="cat_pokemon")],
+        [InlineKeyboardButton("🏴‍☠️ One Piece", callback_data="cat_onepiece")],
+        [InlineKeyboardButton("🎁 Accessories", callback_data="cat_accessories")],
+    ]
+
     await update.message.reply_text(
-        "📂 Choose a category.\n\n"
-        "(We'll replace this with buttons next.)"
+        "📂 Choose a Category",
+        reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-    return ConversationHandler.END
+    return CATEGORY
+
+async def category_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "cat_pokemon":
+        context.user_data["category"] = "Pokemon"
+
+    elif query.data == "cat_onepiece":
+        context.user_data["category"] = "One Piece"
+
+    elif query.data == "cat_accessories":
+        context.user_data["category"] = "Accessories"
+
+    keyboard = [
+        [InlineKeyboardButton("📦 Ready Stock", callback_data="type_ready")],
+        [InlineKeyboardButton("🚢 Preorder", callback_data="type_preorder")],
+    ]
+
+    await query.edit_message_text(
+        f"✅ Category: {context.user_data['category']}\n\n"
+        "Choose Product Type",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+    return TYPE
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
