@@ -312,6 +312,93 @@ New Stock: {new_stock}"""
 
     return ConversationHandler.END
 
+async def removestock(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    rows = get_products()
+
+    if not rows:
+        await update.message.reply_text("📦 No products found.")
+        return ConversationHandler.END
+
+    keyboard = []
+
+    for product_id, name, *_ in rows:
+        keyboard.append([
+            InlineKeyboardButton(
+                name,
+                callback_data=f"remove_{product_id}"
+            )
+        ])
+
+    await update.message.reply_text(
+        "📦 Select a product:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+    return REMOVE_STOCK_SELECT
+
+
+async def removestock_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("remove_", "")
+
+    product = get_product(product_id)
+
+    if not product:
+        await query.edit_message_text("❌ Product not found.")
+        return ConversationHandler.END
+
+    context.user_data["remove_product"] = product_id
+
+    _, name, stock = product
+
+    await query.edit_message_text(
+        f"""📦 {name}
+
+Current Stock: {stock}
+
+➖ How many would you like to remove?"""
+    )
+
+    return REMOVE_STOCK_AMOUNT
+
+
+async def removestock_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    quantity = int(update.message.text)
+
+    product_id = context.user_data["remove_product"]
+
+    product = get_product(product_id)
+
+    _, name, old_stock = product
+
+    if quantity > old_stock:
+        await update.message.reply_text(
+            f"❌ Cannot remove {quantity}.\nOnly {old_stock} left in stock."
+        )
+        return REMOVE_STOCK_AMOUNT
+
+    remove_stock(product_id, quantity)
+
+    new_stock = old_stock - quantity
+
+    await update.message.reply_text(
+        f"""✅ Stock Updated!
+
+📦 {name}
+
+Old Stock: {old_stock}
+Removed: {quantity}
+
+New Stock: {new_stock}"""
+    )
+
+    return ConversationHandler.END
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
