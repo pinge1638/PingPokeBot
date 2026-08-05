@@ -47,6 +47,29 @@ async def product_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return DESCRIPTION
 
+async def product_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["description"] = update.message.text
+
+    await update.message.reply_text(
+        "📂 Choose a category.\n\n"
+        "(We'll replace this with buttons next.)"
+    )
+
+    return ConversationHandler.END
+
+
+async def skip_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["description"] = ""
+
+    await update.message.reply_text(
+        "📂 Choose a category.\n\n"
+        "(We'll replace this with buttons next.)"
+    )
+
+    return ConversationHandler.END
+
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
