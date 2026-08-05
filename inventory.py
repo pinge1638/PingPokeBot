@@ -111,6 +111,80 @@ async def category_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
+    return ConversationHandler.WAITING
+
+
+async def type_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "type_ready":
+        context.user_data["type"] = "Ready Stock"
+
+    elif query.data == "type_preorder":
+        context.user_data["type"] = "Preorder"
+
+    await query.edit_message_text(
+        f"""✅ Category: {context.user_data['category']}
+✅ Type: {context.user_data['type']}
+
+💰 Enter Cost Price"""
+    )
+
+    return COST
+
+async def product_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["cost"] = float(update.message.text)
+
+    await update.message.reply_text(
+        "💵 Enter Selling Price"
+    )
+
+    return PRICE
+
+async def product_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["price"] = float(update.message.text)
+
+    await update.message.reply_text(
+        "📦 Enter Stock Quantity"
+    )
+
+    return STOCK
+
+async def product_stock(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["stock"] = int(update.message.text)
+
+    await update.message.reply_text(
+        f"""
+✅ Product Created!
+
+📦 Name:
+{context.user_data['name']}
+
+📝 Description:
+{context.user_data['description'] or "-"}
+
+📂 Category:
+{context.user_data['category']}
+
+📦 Type:
+{context.user_data['type']}
+
+💰 Cost:
+${context.user_data['cost']:.2f}
+
+💵 Selling:
+${context.user_data['price']:.2f}
+
+📦 Stock:
+{context.user_data['stock']}
+"""
+    )
+
     return ConversationHandler.END
 
 
