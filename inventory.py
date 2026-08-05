@@ -207,13 +207,14 @@ async def products(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = "📦 *Current Inventory*\n\n"
 
-    for product_id, name, category, product_type, price, stock in rows:
+    for product_id, name, category, product_type, cost, price, stock in rows:
         text += (
             f"📦 *{name}*\n"
             f"🆔 {product_id}\n"
             f"📂 {category}\n"
             f"📦 {product_type}\n"
-            f"💵 ${price:.2f}\n"
+            f"💰 Cost: ${cost:.2f}\n"
+            f"💵 Selling: ${price:.2f}\n"
             f"📦 Stock: {stock}\n\n"
         )
 
