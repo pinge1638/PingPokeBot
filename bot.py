@@ -109,6 +109,7 @@ from inventory import (
     product_name,
     product_description,
     skip_description,
+    category_buttons,
     cancel,
     NAME,
     DESCRIPTION,
@@ -139,7 +140,18 @@ app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(product_conv)
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
-app.add_handler(CallbackQueryHandler(admin_buttons))
+app.add_handler(
+    CallbackQueryHandler(
+        admin_buttons,
+        pattern="^(inventory|orders|preorders|payments|giveaway|reports|settings|back_admin)$"
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        category_buttons,
+        pattern="^cat_"
+    )
+)
 app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
