@@ -107,8 +107,11 @@ app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 from inventory import (
     addproduct,
     product_name,
+    product_description,
+    skip_description,
     cancel,
     NAME,
+    DESCRIPTION,
 )
 
 product_conv = ConversationHandler(
@@ -118,6 +121,11 @@ product_conv = ConversationHandler(
     states={
         NAME: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, product_name)
+        ],
+
+        DESCRIPTION: [
+            CommandHandler("skip", skip_description),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, product_description),
         ],
     },
     fallbacks=[
