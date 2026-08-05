@@ -191,7 +191,7 @@ def ticket_count():
 # PRODUCTS
 # ==========================
 
-def add_product(product_id, name, category, product_type, price, stock):
+def add_product(product_id, name, category, product_type, cost, price, stock):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -202,15 +202,17 @@ def add_product(product_id, name, category, product_type, price, stock):
             name,
             category,
             product_type,
+            cost,
             price,
             stock
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         product_id,
         name,
         category,
         product_type,
+        cost,
         price,
         stock
     ))
