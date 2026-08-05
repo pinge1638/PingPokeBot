@@ -136,6 +136,8 @@ async def type_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def product_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    print(">>> product_cost reached")
+
     context.user_data["cost"] = float(update.message.text)
 
     await update.message.reply_text(
@@ -143,6 +145,7 @@ async def product_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     return PRICE
+
 
 async def product_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
