@@ -106,6 +106,9 @@ app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
 from inventory import (
     addproduct,
+    addstock,
+    addstock_select,
+    addstock_amount,
     products,
     product_name,
     product_description,
@@ -123,6 +126,8 @@ from inventory import (
     COST,
     PRICE,
     STOCK,
+    ADD_STOCK_SELECT,
+    ADD_STOCK_AMOUNT,
 )
 
 product_conv = ConversationHandler(
@@ -169,7 +174,28 @@ product_conv = ConversationHandler(
 
 
 app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
+stock_conv = ConversationHandler(
+    entry_points=[
+        CommandHandler("addstock", addstock),
+    ],
+    states={
+        ADD_STOCK_SELECT: [
+            CallbackQueryHandler(addstock_select, pattern="^stock_"),
+        ],
+
+        ADD_STOCK_AMOUNT: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                addstock_amount,
+            ),
+        ],
+    },
+    fallbacks=[
+        CommandHandler("cancel", cancel),
+    ],
+)
 app.add_handler(product_conv)
+app.add_handler(stock_conv)
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
 app.add_handler(CommandHandler("products", products))
