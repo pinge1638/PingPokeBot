@@ -51,6 +51,7 @@ def init_db():
             name TEXT,
             category TEXT,
             product_type TEXT,
+            cost REAL,
             price REAL,
             stock INTEGER DEFAULT 0,
             active INTEGER DEFAULT 1
