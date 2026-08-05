@@ -12,7 +12,7 @@ from telegram.ext import (
 )
 
 import config
-from database import add_product
+from database import add_product, get_products
 # Conversation States
 NAME = 0
 DESCRIPTION = 1
@@ -196,7 +196,30 @@ ${context.user_data['price']:.2f}
     )
 
     return ConversationHandler.END
+async def products(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    rows = get_products()
+
+    if not rows:
+        await update.message.reply_text("📦 No products found.")
+        return
+
+    text = "📦 *Current Inventory*\n\n"
+
+    for product_id, name, category, product_type, price, stock in rows:
+        text += (
+            f"📦 *{name}*\n"
+            f"🆔 {product_id}\n"
+            f"📂 {category}\n"
+            f"📦 {product_type}\n"
+            f"💵 ${price:.2f}\n"
+            f"📦 Stock: {stock}\n\n"
+        )
+
+    await update.message.reply_text(
+        text,
+        parse_mode="Markdown",
+    )
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
