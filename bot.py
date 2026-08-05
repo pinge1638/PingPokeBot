@@ -110,9 +110,16 @@ from inventory import (
     product_description,
     skip_description,
     category_buttons,
+    type_buttons,
+    product_cost,
+    product_price,
+    product_stock,
     cancel,
     NAME,
     DESCRIPTION,
+    COST,
+    PRICE,
+    STOCK,
 )
 
 product_conv = ConversationHandler(
@@ -131,8 +138,23 @@ product_conv = ConversationHandler(
 
         ConversationHandler.WAITING: [
             CallbackQueryHandler(category_buttons, pattern="^cat_"),
+            CallbackQueryHandler(type_buttons, pattern="^type_"),
+        ],
+    
+        COST: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, product_cost)
+        ],
+    
+        PRICE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, product_price)
+        ],
+    
+        STOCK: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, product_stock)
         ],
     },
+
+    
     fallbacks=[
         CommandHandler("cancel", cancel)
     ],
