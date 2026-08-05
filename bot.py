@@ -106,6 +106,7 @@ app = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
 from inventory import (
     addproduct,
+    products,
     product_name,
     product_description,
     skip_description,
@@ -171,6 +172,7 @@ app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
 app.add_handler(product_conv)
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
+app.add_handler(CommandHandler("products", products))
 app.add_handler(
     CallbackQueryHandler(
         admin_buttons,
