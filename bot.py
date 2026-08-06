@@ -1,4 +1,5 @@
 import asyncio
+
 from admin import admin, admin_buttons
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -24,6 +25,7 @@ from shop import (
     shop_type,
     product_page,
     add_cart,
+    checkout,
 )
 
 from giveaway import (
@@ -312,6 +314,12 @@ app.add_handler(
     CallbackQueryHandler(
         add_cart,
         pattern="^cart_",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        checkout,
+        pattern="^checkout$",
     )
 )
 app.add_handler(CommandHandler("ping", ping))
