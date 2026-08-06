@@ -23,6 +23,7 @@ from shop import (
     shop_category,
     shop_type,
     product_page,
+    add_cart,
 )
 
 from giveaway import (
@@ -305,6 +306,12 @@ app.add_handler(
     CallbackQueryHandler(
         product_page,
         pattern="^product_",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        add_cart,
+        pattern="^cart_",
     )
 )
 app.add_handler(CommandHandler("ping", ping))
