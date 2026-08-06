@@ -7,7 +7,9 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
-from database import get_products
+from database import (
+    get_products,
+)
 
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -45,5 +47,48 @@ async def shop_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(
         f"📂 {context.user_data['shop_category']}\n\n"
         "Choose Product Type",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "shop_ready":
+        product_type = "Ready Stock"
+
+    else:
+        product_type = "Preorder"
+
+    category = context.user_data["shop_category"]
+
+    rows = get_products()
+
+    keyboard = []
+
+    for product_id, name, cat, ptype, cost, price, stock in rows:
+
+        if cat != category:
+            continue
+
+        if ptype != product_type:
+            continue
+
+        keyboard.append([
+            InlineKeyboardButton(
+                f"{name} • ${price:.2f} • Stock {stock}",
+                callback_data=f"product_{product_id}"
+            )
+        ])
+
+    if not keyboard:
+        await query.edit_message_text(
+            "❌ No products available."
+        )
+        return
+
+    await query.edit_message_text(
+        f"📦 {category}\n{product_type}\n\nChoose a product:",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
