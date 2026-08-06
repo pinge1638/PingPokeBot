@@ -57,7 +57,22 @@ def init_db():
             active INTEGER DEFAULT 1
         )
     """)
-
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sales (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id TEXT,
+            product_name TEXT,
+            quantity INTEGER,
+            cost REAL,
+            selling REAL,
+            total REAL,
+            profit REAL,
+            customer TEXT,
+            payment TEXT,
+            sold_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)    
+    
     conn.commit()
     conn.close()
 
@@ -296,4 +311,47 @@ def get_product(product_id):
 
     return row
 
+def record_sale(
+    product_id,
+    product_name,
+    quantity,
+    cost,
+    selling,
+    customer,
+    payment,
+):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    total = selling * quantity
+    profit = (selling - cost) * quantity
+
+    cursor.execute("""
+        INSERT INTO sales
+        (
+            product_id,
+            product_name,
+            quantity,
+            cost,
+            selling,
+            total,
+            profit,
+            customer,
+            payment
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        product_id,
+        product_name,
+        quantity,
+        cost,
+        selling,
+        total,
+        profit,
+        customer,
+        payment,
+    ))
+
+    conn.commit()
+    conn.close()    
 init_db()
