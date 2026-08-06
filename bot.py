@@ -21,6 +21,7 @@ ANTI_SPAM = [
 from shop import (
     shop,
     shop_category,
+    shop_type,
 )
 
 from giveaway import (
@@ -279,9 +280,17 @@ app.add_handler(CommandHandler("shop", shop))
 app.add_handler(
     CallbackQueryHandler(
         shop_category,
-        pattern="^shop_",
+        pattern="^shop_(pokemon|onepiece|accessories)$",
     )
 )
+
+app.add_handler(
+    CallbackQueryHandler(
+        shop_type,
+        pattern="^shop_(ready|preorder)$",
+    )
+)
+
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
 app.add_handler(CommandHandler("products", products))
