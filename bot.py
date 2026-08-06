@@ -18,6 +18,11 @@ ANTI_SPAM = [
     "onlyfans","crypto","btc","usdt","binance","porn","sex"
 ]
 
+from shop import (
+    shop,
+    shop_category,
+)
+
 from giveaway import (
     open_giveaway,
     close_giveaway,
@@ -269,6 +274,14 @@ app.add_handler(product_conv)
 app.add_handler(stock_conv)
 app.add_handler(remove_stock_conv)
 app.add_handler(sell_conv)
+app.add_handler(CommandHandler("shop", shop))
+
+app.add_handler(
+    CallbackQueryHandler(
+        shop_category,
+        pattern="^shop_",
+    )
+)
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
 app.add_handler(CommandHandler("products", products))
