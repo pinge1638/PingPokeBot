@@ -13,6 +13,7 @@ from database import (
     get_product_details,
     add_to_cart,
     get_cart,
+    get_cart_quantity,
 )
 
 SELECT_QUANTITY = 0
@@ -81,9 +82,17 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if ptype != product_type:
             continue
 
+        available = stock - get_cart_quantity(
+            query.from_user.id,
+            product_id,
+        )
+        
+        if available <= 0:
+            continue
+        
         keyboard.append([
             InlineKeyboardButton(
-                f"{name} • ${price:.2f} • Stock {stock}",
+                f"{name} • ${price:.2f} • Stock {available}",
                 callback_data=f"product_{product_id}"
             )
         ])
@@ -124,11 +133,23 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ) = product
 
     context.user_data["selected_product"] = product_id
+    cart_qty = get_cart_quantity(
+    query.from_user.id,
+    product_id,
+)
+
+    remaining = stock - cart_qty
+    
+    if remaining <= 0:
+        await query.edit_message_text(
+            "❌ This item is already fully reserved in your cart."
+        )
+        return
 
     keyboard = []
     row = []
 
-    for i in range(1, stock + 1):
+    for i in range(1, remaining + 1):
         row.append(
             InlineKeyboardButton(
                 str(i),
@@ -146,11 +167,11 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(
         f"""📦 {name}
 
-💰 Price: ${price:.2f}
-
-📦 Stock: {stock}
-
-Choose quantity.""",
+    💰 Price: ${price:.2f}
+    
+    📦 Available: {remaining}
+    
+    Choose quantity.""",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
@@ -192,11 +213,18 @@ async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     qty = context.user_data["selected_quantity"]
 
-    add_to_cart(
+    success = add_to_cart(
         query.from_user.id,
         product_id,
         qty,
     )
+
+    if not success:
+        await query.answer(
+            "Not enough stock available.",
+            show_alert=True,
+        )
+        return
 
     cart = get_cart(query.from_user.id)
 
