@@ -15,6 +15,8 @@ from database import (
     get_cart,
 )
 
+SELECT_QUANTITY = 0
+
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
@@ -123,14 +125,23 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["selected_product"] = product_id
 
-    keyboard = [
-        [
+    keyboard = []
+    row = []
+
+    for i in range(1, stock + 1):
+        row.append(
             InlineKeyboardButton(
-                "🛒 Add to Cart",
-                callback_data=f"cart_{product_id}",
+                str(i),
+                callback_data=f"qty_{i}",
             )
-        ]
-    ]
+        )
+
+        if len(row) == 5:
+            keyboard.append(row)
+            row = []
+
+    if row:
+        keyboard.append(row)
 
     await query.edit_message_text(
         f"""📦 {name}
@@ -139,7 +150,36 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 📦 Stock: {stock}
 
-Choose an option below.""",
+Choose quantity.""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def choose_quantity(update, context):
+
+    query = update.callback_query
+    await query.answer()
+
+    qty = int(query.data.replace("qty_", ""))
+
+    context.user_data["selected_quantity"] = qty
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "🛒 Add to Cart",
+                callback_data="cart_add",
+            )
+        ]
+    ]
+
+    await query.edit_message_text(
+        f"""
+📦 Quantity Selected
+
+Quantity: {qty}
+
+Press Add to Cart.
+""",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
@@ -148,11 +188,14 @@ async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    product_id = query.data.replace("cart_", "")
+    product_id = context.user_data["selected_product"]
+
+    qty = context.user_data["selected_quantity"]
 
     add_to_cart(
         query.from_user.id,
         product_id,
+        qty,
     )
 
     cart = get_cart(query.from_user.id)
