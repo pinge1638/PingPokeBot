@@ -22,6 +22,7 @@ from shop import (
     shop,
     shop_category,
     shop_type,
+    product_page,
 )
 
 from giveaway import (
