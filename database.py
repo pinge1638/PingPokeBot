@@ -332,6 +332,29 @@ def get_product_sale(product_id):
 
     return row
 
+def get_product_details(product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            product_id,
+            name,
+            category,
+            product_type,
+            cost,
+            price,
+            stock
+        FROM products
+        WHERE product_id=?
+    """, (product_id,))
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    return row
+
 def record_sale(
     product_id,
     product_name,
