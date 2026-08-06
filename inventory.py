@@ -16,8 +16,10 @@ from database import (
     add_product,
     get_products,
     get_product,
+    get_product_sale,
     add_stock,
     remove_stock,
+    record_sale,
 )
 # Conversation States
 NAME = 0
@@ -31,6 +33,10 @@ ADD_STOCK_SELECT = 7
 ADD_STOCK_AMOUNT = 8
 REMOVE_STOCK_SELECT = 9
 REMOVE_STOCK_AMOUNT = 10
+SELL_SELECT = 11
+SELL_QUANTITY = 12
+SELL_CUSTOMER = 13
+SELL_PAYMENT = 14
 
 
 async def addproduct(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -398,6 +404,66 @@ New Stock: {new_stock}"""
     )
 
     return ConversationHandler.END
+
+async def sell(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    rows = get_products()
+
+    if not rows:
+        await update.message.reply_text("📦 No products found.")
+        return ConversationHandler.END
+
+    keyboard = []
+
+    for product_id, name, *_ in rows:
+        keyboard.append([
+            InlineKeyboardButton(
+                name,
+                callback_data=f"sell_{product_id}"
+            )
+        ])
+
+    await update.message.reply_text(
+        "🛒 Select a product to sell:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+    return SELL_SELECT
+
+async def sell_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("sell_", "")
+
+    product = get_product_sale(product_id)
+
+    if not product:
+        await query.edit_message_text("❌ Product not found.")
+        return ConversationHandler.END
+
+    context.user_data["sale_product"] = product_id
+
+    _, name, cost, price, stock = product
+
+    if stock <= 0:
+        await query.edit_message_text(
+            f"❌ {name} is out of stock."
+        )
+        return ConversationHandler.END
+
+    await query.edit_message_text(
+        f"""🛒 {name}
+
+Current Stock: {stock}
+
+💵 Selling Price: ${price:.2f}
+
+How many would you like to sell?"""
+    )
+
+    return SELL_QUANTITY
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
