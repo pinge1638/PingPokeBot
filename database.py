@@ -72,6 +72,15 @@ def init_db():
             sold_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)    
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cart (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            telegram_id INTEGER,
+            product_id TEXT,
+            quantity INTEGER
+        )
+    """)
     
     conn.commit()
     conn.close()
@@ -398,4 +407,77 @@ def record_sale(
 
     conn.commit()
     conn.close()    
+
+def add_to_cart(telegram_id, product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT quantity
+        FROM cart
+        WHERE telegram_id=? AND product_id=?
+    """, (telegram_id, product_id))
+
+    row = cursor.fetchone()
+
+    if row:
+        cursor.execute("""
+            UPDATE cart
+            SET quantity = quantity + 1
+            WHERE telegram_id=? AND product_id=?
+        """, (
+            telegram_id,
+            product_id,
+        ))
+    else:
+        cursor.execute("""
+            INSERT INTO cart
+            (
+                telegram_id,
+                product_id,
+                quantity
+            )
+            VALUES (?, ?, 1)
+        """, (
+            telegram_id,
+            product_id,
+        ))
+
+    conn.commit()
+    conn.close()
+
+def get_cart(telegram_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            cart.product_id,
+            products.name,
+            products.price,
+            cart.quantity
+        FROM cart
+        JOIN products
+        ON cart.product_id = products.product_id
+        WHERE telegram_id=?
+    """, (telegram_id,))
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
+
+def clear_cart(telegram_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM cart
+        WHERE telegram_id=?
+    """, (telegram_id,))
+
+    conn.commit()
+    conn.close()
+
 init_db()
