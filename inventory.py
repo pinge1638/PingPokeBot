@@ -465,6 +465,91 @@ How many would you like to sell?"""
 
     return SELL_QUANTITY
 
+async def sell_quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    quantity = int(update.message.text)
+
+    product_id = context.user_data["sale_product"]
+
+    product = get_product_sale(product_id)
+
+    _, name, cost, price, stock = product
+
+    if quantity > stock:
+        await update.message.reply_text(
+            f"❌ Only {stock} left in stock."
+        )
+        return SELL_QUANTITY
+
+    context.user_data["sale_quantity"] = quantity
+    context.user_data["sale_cost"] = cost
+    context.user_data["sale_price"] = price
+    context.user_data["sale_name"] = name
+
+    await update.message.reply_text(
+        "👤 Customer Name?"
+    )
+
+    return SELL_CUSTOMER
+
+async def sell_customer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["customer"] = update.message.text
+
+    keyboard = [
+        [InlineKeyboardButton("💵 Cash", callback_data="pay_cash")],
+        [InlineKeyboardButton("🏦 Bank", callback_data="pay_bank")],
+        [InlineKeyboardButton("📱 GCash", callback_data="pay_gcash")],
+        [InlineKeyboardButton("💳 PayPal", callback_data="pay_paypal")],
+    ]
+
+    await update.message.reply_text(
+        "Choose payment method:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+    return SELL_PAYMENT
+
+async def sell_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    payment = query.data.replace("pay_", "")
+
+    record_sale(
+        product_id=context.user_data["sale_product"],
+        product_name=context.user_data["sale_name"],
+        quantity=context.user_data["sale_quantity"],
+        cost=context.user_data["sale_cost"],
+        selling=context.user_data["sale_price"],
+        customer=context.user_data["customer"],
+        payment=payment,
+    )
+
+    remove_stock(
+        context.user_data["sale_product"],
+        context.user_data["sale_quantity"],
+    )
+
+    await query.edit_message_text(
+        f"""✅ Sale Completed!
+
+📦 {context.user_data['sale_name']}
+
+Quantity:
+{context.user_data['sale_quantity']}
+
+Customer:
+{context.user_data['customer']}
+
+Payment:
+{payment.title()}
+"""
+    )
+
+    return ConversationHandler.END
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
