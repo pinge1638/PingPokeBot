@@ -133,6 +133,13 @@ from inventory import (
     removestock_amount,
     REMOVE_STOCK_SELECT,
     REMOVE_STOCK_AMOUNT,
+    sell,
+    sell_select,
+    SELL_SELECT,
+    SELL_QUANTITY,
+    SELL_CUSTOMER,
+    SELL_PAYMENT,
+    
     )
 
 product_conv = ConversationHandler(
@@ -219,9 +226,26 @@ remove_stock_conv = ConversationHandler(
         CommandHandler("cancel", cancel),
     ],
 )
+sell_conv = ConversationHandler(
+    entry_points=[
+        CommandHandler("sell", sell),
+    ],
+    states={
+        SELL_SELECT: [
+            CallbackQueryHandler(
+                sell_select,
+                pattern="^sell_",
+            ),
+        ],
+    },
+    fallbacks=[
+        CommandHandler("cancel", cancel),
+    ],
+)
 app.add_handler(product_conv)
 app.add_handler(stock_conv)
 app.add_handler(remove_stock_conv)
+app.add_handler(sell_conv)
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
 app.add_handler(CommandHandler("products", products))
