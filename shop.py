@@ -191,3 +191,28 @@ async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+async def checkout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "🏠 Self Collection",
+                callback_data="delivery_self",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "📮 Tracked Mail (+$3.50)",
+                callback_data="delivery_mail",
+            )
+        ],
+    ]
+
+    await query.edit_message_text(
+        "🚚 Choose your delivery method.",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
