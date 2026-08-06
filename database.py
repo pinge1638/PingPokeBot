@@ -417,12 +417,29 @@ def add_to_cart(
     cursor = conn.cursor()
 
     cursor.execute("""
+        SELECT stock
+        FROM products
+        WHERE product_id=?
+    """, (product_id,))
+
+    stock = cursor.fetchone()[0]
+
+    cursor.execute("""
         SELECT quantity
         FROM cart
         WHERE telegram_id=? AND product_id=?
-    """, (telegram_id, product_id))
+    """, (
+        telegram_id,
+        product_id,
+    ))
 
     row = cursor.fetchone()
+
+    current = row[0] if row else 0
+
+    if current + quantity > stock:
+        conn.close()
+        return False
 
     if row:
         cursor.execute("""
@@ -452,6 +469,8 @@ def add_to_cart(
     conn.commit()
     conn.close()
 
+    return True
+
 def get_cart(telegram_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -473,6 +492,28 @@ def get_cart(telegram_id):
     conn.close()
 
     return rows
+
+def get_cart_quantity(telegram_id, product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT quantity
+        FROM cart
+        WHERE telegram_id=? AND product_id=?
+    """, (
+        telegram_id,
+        product_id,
+    ))
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row:
+        return row[0]
+
+    return 0
 
 def clear_cart(telegram_id):
     conn = sqlite3.connect(DB_NAME)
