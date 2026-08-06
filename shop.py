@@ -192,6 +192,21 @@ async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
+async def continue_shop(update, context):
+    query = update.callback_query
+    await query.answer()
+
+    keyboard = [
+        [InlineKeyboardButton("🟡 Pokémon", callback_data="shop_pokemon")],
+        [InlineKeyboardButton("🏴‍☠️ One Piece", callback_data="shop_onepiece")],
+        [InlineKeyboardButton("🎁 Accessories", callback_data="shop_accessories")],
+    ]
+
+    await query.edit_message_text(
+        "🛍 Welcome to PingPoke!\n\nChoose a category.",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
 async def checkout(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
