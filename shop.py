@@ -11,6 +11,8 @@ from telegram.ext import (
 from database import (
     get_products,
     get_product_details,
+    add_to_cart,
+    get_cart,
 )
 
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -125,7 +127,7 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton(
                 "🛒 Add to Cart",
-                callback_data="cart_add",
+                callback_data=f"cart_{product_id}",
             )
         ]
     ]
@@ -138,5 +140,54 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📦 Stock: {stock}
 
 Choose an option below.""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("cart_", "")
+
+    add_to_cart(
+        query.from_user.id,
+        product_id,
+    )
+
+    cart = get_cart(query.from_user.id)
+
+    text = "🛒 Your Cart\n\n"
+
+    total = 0
+
+    for _, name, price, qty in cart:
+        subtotal = price * qty
+        total += subtotal
+
+        text += (
+            f"📦 {name}\n"
+            f"x{qty} • ${subtotal:.2f}\n\n"
+        )
+
+    text += f"💰 Total: ${total:.2f}"
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "🛍 Continue Shopping",
+                callback_data="continue_shop",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "💳 Checkout",
+                callback_data="checkout",
+            )
+        ],
+    ]
+
+    await query.edit_message_text(
+        text,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
