@@ -94,3 +94,47 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📦 {category}\n{product_type}\n\nChoose a product:",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("product_", "")
+
+    product = get_product_details(product_id)
+
+    if not product:
+        await query.edit_message_text("❌ Product not found.")
+        return
+
+    (
+        product_id,
+        name,
+        category,
+        product_type,
+        cost,
+        price,
+        stock,
+    ) = product
+
+    context.user_data["selected_product"] = product_id
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "🛒 Add to Cart",
+                callback_data="cart_add",
+            )
+        ]
+    ]
+
+    await query.edit_message_text(
+        f"""📦 {name}
+
+💰 Price: ${price:.2f}
+
+📦 Stock: {stock}
+
+Choose an option below.""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
