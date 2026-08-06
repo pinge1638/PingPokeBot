@@ -7,8 +7,10 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
+
 from database import (
     get_products,
+    get_product_details,
 )
 
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
