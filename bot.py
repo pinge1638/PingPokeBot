@@ -135,11 +135,13 @@ from inventory import (
     REMOVE_STOCK_AMOUNT,
     sell,
     sell_select,
+    sell_quantity,
+    sell_customer,
+    sell_payment,
     SELL_SELECT,
     SELL_QUANTITY,
     SELL_CUSTOMER,
     SELL_PAYMENT,
-    
     )
 
 product_conv = ConversationHandler(
@@ -235,6 +237,27 @@ sell_conv = ConversationHandler(
             CallbackQueryHandler(
                 sell_select,
                 pattern="^sell_",
+            ),
+        ],
+
+        SELL_QUANTITY: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                sell_quantity,
+            ),
+        ],
+
+        SELL_CUSTOMER: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                sell_customer,
+            ),
+        ],
+
+        SELL_PAYMENT: [
+            CallbackQueryHandler(
+                sell_payment,
+                pattern="^pay_",
             ),
         ],
     },
