@@ -408,7 +408,11 @@ def record_sale(
     conn.commit()
     conn.close()    
 
-def add_to_cart(telegram_id, product_id):
+def add_to_cart(
+    telegram_id,
+    product_id,
+    quantity,
+):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -423,9 +427,10 @@ def add_to_cart(telegram_id, product_id):
     if row:
         cursor.execute("""
             UPDATE cart
-            SET quantity = quantity + 1
+            SET quantity = quantity + ?
             WHERE telegram_id=? AND product_id=?
         """, (
+            quantity,
             telegram_id,
             product_id,
         ))
@@ -437,10 +442,11 @@ def add_to_cart(telegram_id, product_id):
                 product_id,
                 quantity
             )
-            VALUES (?, ?, 1)
+            VALUES (?, ?, ?)
         """, (
             telegram_id,
             product_id,
+            quantity,
         ))
 
     conn.commit()
