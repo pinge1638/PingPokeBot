@@ -27,6 +27,7 @@ from shop import (
     add_cart,
     continue_shop,
     checkout,
+    choose_quantity,
 )
 
 from giveaway import (
@@ -321,6 +322,12 @@ app.add_handler(
     CallbackQueryHandler(
         continue_shop,
         pattern="^continue_shop$",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        choose_quantity,
+        pattern="^qty_",
     )
 )
 app.add_handler(
