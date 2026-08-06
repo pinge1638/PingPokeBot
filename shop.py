@@ -94,6 +94,8 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📦 {category}\n{product_type}\n\nChoose a product:",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+
 async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
