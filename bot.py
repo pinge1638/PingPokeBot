@@ -25,6 +25,7 @@ from shop import (
     shop_type,
     product_page,
     add_cart,
+    continue_shop,
     checkout,
 )
 
@@ -314,6 +315,12 @@ app.add_handler(
     CallbackQueryHandler(
         add_cart,
         pattern="^cart_",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        continue_shop,
+        pattern="^continue_shop$",
     )
 )
 app.add_handler(
