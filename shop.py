@@ -13,7 +13,6 @@ from database import (
     get_product_details,
     add_to_cart,
     get_cart,
-    get_cart_quantity,
     create_order,
 )
 
@@ -83,17 +82,14 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if ptype != product_type:
             continue
 
-        available = stock - get_cart_quantity(
-            query.from_user.id,
-            product_id,
-        )
+        available = stock
         
         if available <= 0:
             continue
         
         keyboard.append([
             InlineKeyboardButton(
-                f"{name} • ${price:.2f} • Stock {available}",
+                f"{name} • ${price:.2f} • Stock {stock}",
                 callback_data=f"product_{product_id}"
             )
         ])
@@ -134,23 +130,11 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ) = product
 
     context.user_data["selected_product"] = product_id
-    cart_qty = get_cart_quantity(
-    query.from_user.id,
-    product_id,
-)
-
-    remaining = stock - cart_qty
-    
-    if remaining <= 0:
-        await query.edit_message_text(
-            "❌ This item is already fully reserved in your cart."
-        )
-        return
-
+  
     keyboard = []
     row = []
 
-    for i in range(1, remaining + 1):
+    for i in range(1, stock + 1):
         row.append(
             InlineKeyboardButton(
                 str(i),
@@ -170,7 +154,7 @@ async def product_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     💰 Price: ${price:.2f}
     
-    📦 Available: {remaining}
+    📦 Stock: {stock}
     
     Choose quantity.""",
         reply_markup=InlineKeyboardMarkup(keyboard),
@@ -507,6 +491,45 @@ Your order has been submitted for verification.
 
 We will notify you once payment has been confirmed.
 """
+    )
+
+    from config import OWNER_ID
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "✅ Approve",
+                callback_data=f"approve_{order_number}",
+            ),
+            InlineKeyboardButton(
+                "❌ Reject",
+                callback_data=f"reject_{order_number}",
+            ),
+        ]
+    ]
+
+    await context.bot.send_photo(
+        chat_id=OWNER_ID,
+        photo=photo.file_id,
+        caption=f"""
+    🛒 NEW ORDER
+    
+    Order #{order_number}
+    
+    Customer:
+    @{update.effective_user.username}
+    
+    Items:
+    {items}
+    
+    Subtotal: ${subtotal:.2f}
+    Shipping: ${shipping:.2f}
+    Total: ${total:.2f}
+    
+    Delivery:
+    {delivery}
+    """,
+        reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
     return ConversationHandler.END
