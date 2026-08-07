@@ -16,6 +16,9 @@ from database import (
     get_cart_quantity,
     create_order,
     clear_cart,
+    increase_cart,
+    decrease_cart,
+    remove_cart_item,
 )
 
 SELECT_QUANTITY = 0
@@ -258,6 +261,54 @@ async def continue_shop(update, context):
         "🛍 Welcome to PingPoke!\n\nChoose a category.",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+async def show_cart(query):
+
+    await show_cart(query)
+
+async def plus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("plus_", "")
+
+    increase_cart(
+        query.from_user.id,
+        product_id,
+    )
+
+    await show_cart(query)
+
+
+async def minus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("minus_", "")
+
+    decrease_cart(
+        query.from_user.id,
+        product_id,
+    )
+
+    await show_cart(query)
+
+
+async def delete_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    product_id = query.data.replace("delete_", "")
+
+    remove_cart_item(
+        query.from_user.id,
+        product_id,
+    )
+
+    await show_cart(query)
+
 
 async def checkout(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
