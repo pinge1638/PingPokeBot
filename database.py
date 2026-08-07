@@ -22,14 +22,19 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegram_id INTEGER UNIQUE,
-            full_name TEXT,
-            username TEXT,
-            ticket_number INTEGER UNIQUE,
-            claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_number INTEGER,
+        telegram_id INTEGER,
+        username TEXT,
+        items TEXT,
+        subtotal REAL,
+        shipping REAL,
+        total REAL,
+        delivery TEXT,
+        status TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
     """)
 
     cursor.execute("""
