@@ -362,4 +362,45 @@ async def delivery_method(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
+async def back_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    query = update.callback_query
+    await query.answer()
+
+    cart = get_cart(query.from_user.id)
+
+    text = "🛒 Your Cart\n\n"
+
+    total = 0
+
+    for _, name, price, qty in cart:
+
+        subtotal = price * qty
+        total += subtotal
+
+        text += (
+            f"📦 {name}\n"
+            f"x{qty} • ${subtotal:.2f}\n\n"
+        )
+
+    text += f"💰 Total: ${total:.2f}"
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "🛍 Continue Shopping",
+                callback_data="continue_shop",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "💳 Checkout",
+                callback_data="checkout",
+            )
+        ],
+    ]
+
+    await query.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
