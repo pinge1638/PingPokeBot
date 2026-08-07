@@ -35,6 +35,11 @@ from shop import (
     payment_screenshot,
     WAIT_PAYMENT,
 )
+from orders import (
+    approve,
+    reject,
+)
+
 
 from giveaway import (
     open_giveaway,
@@ -378,6 +383,19 @@ payment_conv = ConversationHandler(
     fallbacks=[],
 )
 app.add_handler(payment_conv)
+app.add_handler(
+    CallbackQueryHandler(
+        approve,
+        pattern="^approve_",
+    )
+)
+
+app.add_handler(
+    CallbackQueryHandler(
+        reject,
+        pattern="^reject_",
+    )
+)
 app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
