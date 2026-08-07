@@ -587,4 +587,31 @@ def create_order(
 
     return order_number
 
+def approve_order(order_number):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE orders
+        SET status='Approved'
+        WHERE order_number=?
+    """, (order_number,))
+
+    conn.commit()
+    conn.close()
+
+
+def reject_order(order_number):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE orders
+        SET status='Rejected'
+        WHERE order_number=?
+    """, (order_number,))
+
+    conn.commit()
+    conn.close()
+
 init_db()
