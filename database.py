@@ -637,5 +637,64 @@ def get_order(order_number):
     conn.close()
 
     return row
+def increase_cart(telegram_id, product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE cart
+        SET quantity = quantity + 1
+        WHERE telegram_id=? AND product_id=?
+    """, (
+        telegram_id,
+        product_id,
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def decrease_cart(telegram_id, product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE cart
+        SET quantity = quantity - 1
+        WHERE telegram_id=? AND product_id=?
+    """, (
+        telegram_id,
+        product_id,
+    ))
+
+    cursor.execute("""
+        DELETE FROM cart
+        WHERE telegram_id=?
+        AND product_id=?
+        AND quantity<=0
+    """, (
+        telegram_id,
+        product_id,
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def remove_cart_item(telegram_id, product_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM cart
+        WHERE telegram_id=? AND product_id=?
+    """, (
+        telegram_id,
+        product_id,
+    ))
+
+    conn.commit()
+    conn.close()
+
 
 init_db()
