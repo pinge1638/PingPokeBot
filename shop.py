@@ -14,6 +14,7 @@ from database import (
     add_to_cart,
     get_cart,
     get_cart_quantity,
+    create_order,
 )
 
 SELECT_QUANTITY = 0
@@ -316,6 +317,8 @@ async def delivery_method(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["delivery"] = "Tracked Mail"
         shipping = 3.50
 
+    context.user_data["shipping"] = shipping
+    
     cart = get_cart(query.from_user.id)
 
     text = "📋 Order Summary\n\n"
@@ -469,10 +472,41 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     context.user_data["payment_photo"] = photo.file_id
 
-    await update.message.reply_text(
-        "✅ Payment screenshot received!\n\n"
-        "Your order has been submitted for verification.\n"
-        "We will notify you once payment has been confirmed."
+    cart = get_cart(update.effective_user.id)
+
+    items = ""
+    
+    subtotal = 0
+    
+    for _, name, price, qty in cart:
+        items += f"{name} x{qty}\n"
+        subtotal += price * qty
+    
+    shipping = context.user_data["shipping"]
+    delivery = context.user_data["delivery"]
+    
+    total = subtotal + shipping
+    
+    order_number = create_order(
+        update.effective_user.id,
+        update.effective_user.username,
+        items,
+        subtotal,
+        shipping,
+        total,
+        delivery,
+    )
+    
+   await update.message.reply_text(
+        f"""
+    ✅ Payment screenshot received!
+    
+    Order #{order_number}
+    
+    Your order has been submitted for verification.
+    
+    We will notify you once payment has been confirmed.
+    """
     )
 
     return ConversationHandler.END
