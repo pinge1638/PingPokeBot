@@ -34,6 +34,9 @@ from shop import (
     paid,
     payment_screenshot,
     WAIT_PAYMENT,
+    plus_item,
+    minus_item,
+    delete_item,
 )
 from orders import (
     approve,
@@ -394,6 +397,26 @@ app.add_handler(
     CallbackQueryHandler(
         reject,
         pattern="^reject_",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        plus_item,
+        pattern="^plus_",
+    )
+)
+
+app.add_handler(
+    CallbackQueryHandler(
+        minus_item,
+        pattern="^minus_",
+    )
+)
+
+app.add_handler(
+    CallbackQueryHandler(
+        delete_item,
+        pattern="^delete_",
     )
 )
 app.add_handler(CommandHandler("ping", ping))
