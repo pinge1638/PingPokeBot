@@ -28,6 +28,7 @@ from shop import (
     continue_shop,
     checkout,
     choose_quantity,
+    delivery_method,
 )
 
 from giveaway import (
@@ -334,6 +335,12 @@ app.add_handler(
     CallbackQueryHandler(
         checkout,
         pattern="^checkout$",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        delivery_method,
+        pattern="^delivery_",
     )
 )
 app.add_handler(CommandHandler("ping", ping))
