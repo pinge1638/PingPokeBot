@@ -440,3 +440,39 @@ After payment, press:
         caption=text,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+from telegram.ext import ConversationHandler
+
+WAIT_PAYMENT = 1
+
+async def paid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    await query.message.reply_text(
+        "📷 Please upload your payment screenshot.\n\n"
+        "Once uploaded, our team will verify your payment."
+    )
+
+    return WAIT_PAYMENT
+
+async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message.photo:
+        await update.message.reply_text(
+            "❌ Please upload an image."
+        )
+        return WAIT_PAYMENT
+
+    photo = update.message.photo[-1]
+
+    context.user_data["payment_photo"] = photo.file_id
+
+    await update.message.reply_text(
+        "✅ Payment screenshot received!\n\n"
+        "Your order has been submitted for verification.\n"
+        "We will notify you once payment has been confirmed."
+    )
+
+    return ConversationHandler.END
