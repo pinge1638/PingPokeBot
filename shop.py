@@ -404,3 +404,39 @@ async def back_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+async def paynow(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    text = """
+💳 PayNow Payment
+
+Please make payment using the QR Code.
+
+⚠️ IMPORTANT
+
+Please screenshot your payment after transferring.
+
+You will need to upload the screenshot on the next page.
+
+After payment, press:
+
+✅ I've Paid
+"""
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "✅ I've Paid",
+                callback_data="paid",
+            )
+        ]
+    ]
+
+    await query.message.reply_photo(
+        photo=open("paynow.png", "rb"),
+        caption=text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
