@@ -302,3 +302,64 @@ async def checkout(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🚚 Choose your delivery method.",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+async def delivery_method(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "delivery_self":
+        context.user_data["delivery"] = "Self Collection"
+        shipping = 0
+
+    else:
+        context.user_data["delivery"] = "Tracked Mail"
+        shipping = 3.50
+
+    cart = get_cart(query.from_user.id)
+
+    text = "📋 Order Summary\n\n"
+
+    subtotal = 0
+
+    for _, name, price, qty in cart:
+
+        line_total = price * qty
+        subtotal += line_total
+
+        text += (
+            f"📦 {name}\n"
+            f"x{qty} • ${line_total:.2f}\n\n"
+        )
+
+    total = subtotal + shipping
+
+    text += (
+        "──────────────\n"
+        f"Subtotal: ${subtotal:.2f}\n"
+        f"Delivery: {context.user_data['delivery']}\n"
+        f"Shipping: ${shipping:.2f}\n\n"
+        f"💰 Total: ${total:.2f}"
+    )
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "💳 PayNow",
+                callback_data="paynow",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "🛒 Back to Cart",
+                callback_data="back_cart",
+            )
+        ],
+    ]
+
+    await query.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+
