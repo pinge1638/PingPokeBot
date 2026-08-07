@@ -475,18 +475,18 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
     cart = get_cart(update.effective_user.id)
 
     items = ""
-    
+
     subtotal = 0
-    
+
     for _, name, price, qty in cart:
         items += f"{name} x{qty}\n"
         subtotal += price * qty
-    
+
     shipping = context.user_data["shipping"]
     delivery = context.user_data["delivery"]
-    
+
     total = subtotal + shipping
-    
+
     order_number = create_order(
         update.effective_user.id,
         update.effective_user.username,
@@ -496,17 +496,17 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
         total,
         delivery,
     )
-    
-   await update.message.reply_text(
+
+    await update.message.reply_text(
         f"""
-    ✅ Payment screenshot received!
-    
-    Order #{order_number}
-    
-    Your order has been submitted for verification.
-    
-    We will notify you once payment has been confirmed.
-    """
+✅ Payment screenshot received!
+
+Order #{order_number}
+
+Your order has been submitted for verification.
+
+We will notify you once payment has been confirmed.
+"""
     )
 
     return ConversationHandler.END
