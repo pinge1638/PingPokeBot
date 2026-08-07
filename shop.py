@@ -13,7 +13,9 @@ from database import (
     get_product_details,
     add_to_cart,
     get_cart,
+    get_cart_quantity,
     create_order,
+    clear_cart,
 )
 
 SELECT_QUANTITY = 0
@@ -198,19 +200,13 @@ async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     qty = context.user_data["selected_quantity"]
 
-    success = add_to_cart(
+    add_to_cart(
         query.from_user.id,
         product_id,
         qty,
     )
 
-    if not success:
-        await query.answer(
-            "Not enough stock available.",
-            show_alert=True,
-        )
-        return
-
+    
     cart = get_cart(query.from_user.id)
 
     text = "🛒 Your Cart\n\n"
@@ -531,5 +527,5 @@ We will notify you once payment has been confirmed.
     """,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
-
+    clear_cart(update.effective_user.id)
     return ConversationHandler.END
