@@ -1,17 +1,13 @@
-from telegram import (
-    Update,
-)
-
-from telegram.ext import (
-    ContextTypes,
-)
+from telegram import Update
+from telegram.ext import ContextTypes
 
 from database import (
     approve_order,
     reject_order,
 )
-async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+
+async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
@@ -24,8 +20,9 @@ async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_caption(
         caption=query.message.caption + "\n\n✅ APPROVED"
     )
-  async def reject(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+
+async def reject(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
