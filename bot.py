@@ -31,6 +31,9 @@ from shop import (
     delivery_method,
     back_cart,
     paynow,
+    paid,
+    payment_screenshot,
+    WAIT_PAYMENT,
 )
 
 from giveaway import (
@@ -357,6 +360,24 @@ app.add_handler(
         pattern="^paynow$",
     )
 )
+payment_conv = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(
+            paid,
+            pattern="^paid$",
+        )
+    ],
+    states={
+        WAIT_PAYMENT: [
+            MessageHandler(
+                filters.PHOTO,
+                payment_screenshot,
+            )
+        ]
+    },
+    fallbacks=[],
+)
+app.add_handler(payment_conv)
 app.add_handler(CommandHandler("ping", ping))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("opengiveaway", open_giveaway))
