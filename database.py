@@ -613,5 +613,29 @@ def reject_order(order_number):
 
     conn.commit()
     conn.close()
+    
+def get_order(order_number):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            telegram_id,
+            username,
+            items,
+            subtotal,
+            shipping,
+            total,
+            delivery,
+            status
+        FROM orders
+        WHERE order_number=?
+    """, (order_number,))
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    return row
 
 init_db()
