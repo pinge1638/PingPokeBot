@@ -532,4 +532,59 @@ def clear_cart(telegram_id):
     conn.commit()
     conn.close()
 
+def create_order(
+    telegram_id,
+    username,
+    items,
+    subtotal,
+    shipping,
+    total,
+    delivery,
+):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT MAX(order_number)
+        FROM orders
+    """)
+
+    row = cursor.fetchone()
+
+    if row[0] is None:
+        order_number = 1001
+    else:
+        order_number = row[0] + 1
+
+    cursor.execute("""
+        INSERT INTO orders
+        (
+            order_number,
+            telegram_id,
+            username,
+            items,
+            subtotal,
+            shipping,
+            total,
+            delivery,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        order_number,
+        telegram_id,
+        username,
+        items,
+        subtotal,
+        shipping,
+        total,
+        delivery,
+        "Pending Verification",
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return order_number
+
 init_db()
