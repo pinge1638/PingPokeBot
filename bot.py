@@ -1,5 +1,5 @@
 import asyncio
-
+import pytesseract
 from admin import admin, admin_buttons
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -459,6 +459,13 @@ try:
 
 except Exception as e:
     print("GOOGLE SHEETS TEST FAILED")
+    print(repr(e))
+
+try:
+    print("TESSERACT VERSION:")
+    print(pytesseract.get_tesseract_version())
+except Exception as e:
+    print("TESSERACT TEST FAILED")
     print(repr(e))
 
 print("PingPokeBot running...")
