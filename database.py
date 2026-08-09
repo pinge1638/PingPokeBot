@@ -220,6 +220,35 @@ def ticket_count():
 # PRODUCTS
 # ==========================
 
+def get_next_product_id():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT product_id
+        FROM products
+        WHERE product_id LIKE 'P%'
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    numbers = []
+
+    for row in rows:
+        product_id = row[0]
+
+        try:
+            numbers.append(int(product_id[1:]))
+        except (ValueError, TypeError):
+            pass
+
+    if not numbers:
+        return "P0001"
+
+    return f"P{max(numbers) + 1:04d}"
+
 def add_product(product_id, name, category, product_type, cost, price, stock):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
