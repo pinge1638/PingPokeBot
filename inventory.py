@@ -20,6 +20,7 @@ from database import (
     add_stock,
     remove_stock,
     record_sale,
+    get_next_product_id,
 )
 # Conversation States
 NAME = 0
@@ -176,8 +177,10 @@ async def product_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def product_stock(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["stock"] = int(update.message.text)
+    product_id = get_next_product_id()
+
     add_product(
-        product_id=context.user_data["name"].lower().replace(" ", "_"),
+        product_id=product_id,
         name=context.user_data["name"],
         category=context.user_data["category"],
         product_type=context.user_data["type"],
