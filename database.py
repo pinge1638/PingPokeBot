@@ -748,6 +748,33 @@ def get_order(order_number):
 
     return row
 
+def get_orders_by_status(status):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            order_number,
+            telegram_id,
+            username,
+            items,
+            subtotal,
+            shipping,
+            total,
+            delivery,
+            status,
+            created_at
+        FROM orders
+        WHERE status=?
+        ORDER BY order_number DESC
+    """, (status,))
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
+
 def get_order_items(order_number):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
