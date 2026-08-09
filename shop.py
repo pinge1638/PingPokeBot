@@ -9,8 +9,6 @@ from telegram.ext import (
 )
 
 from database import (
-    get_products,
-    get_product_details,
     add_to_cart,
     get_cart,
     get_cart_quantity,
@@ -21,7 +19,26 @@ from database import (
     remove_cart_item,
 )
 
+from google_sheets import get_products
+
 SELECT_QUANTITY = 0
+
+def get_product_details(product_id):
+    products = get_products()
+
+    for product in products:
+        if product["product_id"] == product_id:
+            return (
+                product["product_id"],
+                product["name"],
+                product["category"],
+                product["type"],
+                product["cost"],
+                product["price"],
+                product["stock"],
+            )
+
+    return None
 
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -76,23 +93,28 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     category = context.user_data["shop_category"]
 
-    rows = get_products()
+    products = get_products()
 
     keyboard = []
-
-    for product_id, name, cat, ptype, cost, price, stock in rows:
-
+    
+    for product in products:
+    
+        product_id = product["product_id"]
+        name = product["name"]
+        cat = product["category"]
+        ptype = product["type"]
+        price = product["price"]
+        stock = product["stock"]
+    
         if cat != category:
             continue
-
+    
         if ptype != product_type:
             continue
-
-        available = stock
-        
-        if available <= 0:
+    
+        if stock <= 0:
             continue
-        
+    
         keyboard.append([
             InlineKeyboardButton(
                 f"{name} • ${price:.2f} • Stock {stock}",
@@ -126,21 +148,28 @@ async def back_to_products(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    rows = get_products()
+    products = get_products()
 
     keyboard = []
-
-    for product_id, name, cat, ptype, cost, price, stock in rows:
-
+    
+    for product in products:
+    
+        product_id = product["product_id"]
+        name = product["name"]
+        cat = product["category"]
+        ptype = product["type"]
+        price = product["price"]
+        stock = product["stock"]
+    
         if cat != category:
             continue
-
+    
         if ptype != product_type:
             continue
-
+    
         if stock <= 0:
             continue
-
+    
         keyboard.append([
             InlineKeyboardButton(
                 f"{name} • ${price:.2f} • Stock {stock}",
@@ -306,6 +335,7 @@ async def continue_shop(update, context):
         "🛍 Welcome to PingPoke!\n\nChoose a category.",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
 async def show_cart(query):
 
     cart = get_cart(query.from_user.id)
@@ -315,9 +345,78 @@ async def show_cart(query):
     total = 0
     keyboard = []
 
-    for product_id, name, price, qty in cart:
+    for product_id, name, old_price, qty in cart:
 
-        subtotal = price * qty
+        product = get_product_details(product_id)
+
+        if not product:
+            continue
+
+        current_price = product[5]
+
+        subtotal = current_price * qty
+        total += subtotal
+
+        text += (
+            f"📦 {name}\n"
+            f"x{qty} • ${subtotal:.2f}\n\n"
+        )
+
+        keyboard.append([
+            InlineKeyboardButton(
+                "➖",
+                callback_data=f"minus_{product_id}",
+            ),
+            InlineKeyboardButton(
+                "➕",
+                callback_data=f"plus_{product_id}",
+            ),
+            InlineKeyboardButton(
+                "🗑",
+                callback_data=f"delete_{product_id}",
+            ),
+        ])
+
+    text += f"💰 Total: ${total:.2f}"
+
+    keyboard.append([
+        InlineKeyboardButton(
+            "🛍 Continue Shopping",
+            callback_data="continue_shop",
+        )
+    ])
+
+    keyboard.append([
+        InlineKeyboardButton(
+            "💳 Checkout",
+            callback_data="checkout",
+        )
+    ])
+
+    await query.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def show_cart(query):
+
+    cart = get_cart(query.from_user.id)
+
+    text = "🛒 Your Cart\n\n"
+
+    total = 0
+    keyboard = []
+
+    for product_id, name, old_price, qty in cart:
+
+        product = get_product_details(product_id)
+
+        if not product:
+            continue
+
+        current_price = product[5]
+
+        subtotal = current_price * qty
         total += subtotal
 
         text += (
@@ -475,11 +574,18 @@ async def delivery_method(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     subtotal = 0
 
-    for _, name, price, qty in cart:
+    for product_id, name, old_price, qty in cart:
 
-        line_total = price * qty
+        product = get_product_details(product_id)
+    
+        if not product:
+            continue
+    
+        current_price = product[5]
+    
+        line_total = current_price * qty
         subtotal += line_total
-
+    
         text += (
             f"📦 {name}\n"
             f"x{qty} • ${line_total:.2f}\n\n"
@@ -592,9 +698,17 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     subtotal = 0
 
-    for _, name, price, qty in cart:
+    for product_id, name, old_price, qty in cart:
+
+        product = get_product_details(product_id)
+    
+        if not product:
+            continue
+    
+        current_price = product[5]
+    
         items += f"{name} x{qty}\n"
-        subtotal += price * qty
+        subtotal += current_price * qty
 
     shipping = context.user_data["shipping"]
     delivery = context.user_data["delivery"]
