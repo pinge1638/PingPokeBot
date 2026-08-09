@@ -318,7 +318,7 @@ app.add_handler(CommandHandler("products", products))
 app.add_handler(
     CallbackQueryHandler(
         admin_buttons,
-        pattern="^(inventory|orders|preorders|payments|giveaway|reports|settings|back_admin|orders_pending|orders_approved|orders_rejected)$"
+        pattern="^(inventory|orders|preorders|payments|giveaway|reports|settings|back_admin|orders_pending|orders_approved|orders_rejected|vieworder_\d+)$"
     )
 )
 
