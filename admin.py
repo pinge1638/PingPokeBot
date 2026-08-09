@@ -6,7 +6,10 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 import config
-from database import get_orders_by_status
+from database import (
+    get_orders_by_status,
+    get_order,
+)
 
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -259,6 +262,88 @@ async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             "🔴 *Rejected Orders*\n\n"
             "Select an order:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
+
+    elif query.data.startswith("vieworder_"):
+
+        order_number = int(
+            query.data.replace("vieworder_", "")
+        )
+    
+        order = get_order(order_number)
+    
+        if not order:
+            await query.edit_message_text(
+                "❌ Order not found.",
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton(
+                            "⬅ Back",
+                            callback_data="orders",
+                        )
+                    ]
+                ]),
+            )
+            return
+    
+        telegram_id = order[0]
+        username = order[1]
+        items = order[2]
+        subtotal = order[3]
+        shipping = order[4]
+        total = order[5]
+        delivery = order[6]
+        status = order[7]
+    
+        if status == "Pending Verification":
+            status_text = "🟡 Pending Verification"
+        elif status == "Approved":
+            status_text = "🟢 Approved"
+        elif status == "Rejected":
+            status_text = "🔴 Rejected"
+        else:
+            status_text = status
+    
+        text = (
+            f"🛒 *Order #{order_number}*\n\n"
+            f"👤 Customer:\n"
+            f"@{username}\n\n"
+            f"📦 Items:\n"
+            f"{items}\n\n"
+            f"💰 Subtotal: ${subtotal:.2f}\n"
+            f"🚚 Shipping: ${shipping:.2f}\n"
+            f"💵 Total: ${total:.2f}\n\n"
+            f"📮 Delivery:\n"
+            f"{delivery}\n\n"
+            f"📋 Status:\n"
+            f"{status_text}"
+        )
+    
+        keyboard = []
+    
+        if status == "Pending Verification":
+            keyboard.append([
+                InlineKeyboardButton(
+                    "✅ Approve",
+                    callback_data=f"approve_{order_number}",
+                ),
+                InlineKeyboardButton(
+                    "❌ Reject",
+                    callback_data=f"reject_{order_number}",
+                ),
+            ])
+    
+        keyboard.append([
+            InlineKeyboardButton(
+                "⬅ Back",
+                callback_data=f"orders_{'pending' if status == 'Pending Verification' else 'approved' if status == 'Approved' else 'rejected'}",
+            )
+        ])
+    
+        await query.edit_message_text(
+            text,
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown",
         )
