@@ -37,6 +37,7 @@ from shop import (
     plus_item,
     minus_item,
     delete_item,
+    back_to_products,
 )
 from orders import (
     approve,
@@ -419,6 +420,12 @@ app.add_handler(
     CallbackQueryHandler(
         delete_item,
         pattern="^delete_",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        back_to_products,
+        pattern="^back_products$",
     )
 )
 app.add_handler(CommandHandler("ping", ping))
