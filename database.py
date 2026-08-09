@@ -708,10 +708,14 @@ def approve_order(order_number):
 
     # Reduce Google Sheets stock
     for product_id, quantity in items:
-        update_stock(
+        success = update_stock(
             product_id,
             -quantity,
         )
+    
+        if not success:
+            conn.close()
+            return False
 
     # Mark order approved
     cursor.execute("""
