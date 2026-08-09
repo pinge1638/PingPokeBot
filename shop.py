@@ -497,7 +497,7 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     total = subtotal + shipping
 
-      order_number = create_order(
+    order_number = create_order(
         update.effective_user.id,
         update.effective_user.username,
         cart,
