@@ -38,6 +38,16 @@ def init_db():
     """)
 
     cursor.execute("""
+    CREATE TABLE IF NOT EXISTS order_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_number INTEGER,
+        product_id TEXT,
+        product_name TEXT,
+        quantity INTEGER
+    )
+    """)
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
             key TEXT PRIMARY KEY,
             value TEXT
@@ -585,6 +595,11 @@ def create_order(
     else:
         order_number = row[0] + 1
 
+    items = ""
+
+    for product_id, name, price, quantity in cart:
+        items += f"{name} x{quantity}\n"
+
     cursor.execute("""
         INSERT INTO orders
         (
@@ -612,22 +627,21 @@ def create_order(
     ))
 
     for product_id, name, price, quantity in cart:
-
-    cursor.execute("""
-        INSERT INTO order_items
-        (
+        cursor.execute("""
+            INSERT INTO order_items
+            (
+                order_number,
+                product_id,
+                product_name,
+                quantity
+            )
+            VALUES (?, ?, ?, ?)
+        """, (
             order_number,
             product_id,
-            product_name,
-            quantity
-        )
-        VALUES (?, ?, ?, ?)
-    """, (
-        order_number,
-        product_id,
-        name,
-        quantity,
-    ))
+            name,
+            quantity,
+        ))
 
     conn.commit()
     conn.close()
@@ -639,6 +653,53 @@ def approve_order(order_number):
     cursor = conn.cursor()
 
     cursor.execute("""
+        SELECT status
+        FROM orders
+        WHERE order_number=?
+    """, (order_number,))
+
+    order = cursor.fetchone()
+
+    if not order:
+        conn.close()
+        return False
+
+    if order[0] == "Approved":
+        conn.close()
+        return False
+
+    cursor.execute("""
+        SELECT product_id, quantity
+        FROM order_items
+        WHERE order_number=?
+    """, (order_number,))
+
+    items = cursor.fetchall()
+
+    for product_id, quantity in items:
+        cursor.execute("""
+            SELECT stock
+            FROM products
+            WHERE product_id=?
+        """, (product_id,))
+
+        row = cursor.fetchone()
+
+        if not row or row[0] < quantity:
+            conn.close()
+            return False
+
+    for product_id, quantity in items:
+        cursor.execute("""
+            UPDATE products
+            SET stock = stock - ?
+            WHERE product_id=?
+        """, (
+            quantity,
+            product_id,
+        ))
+
+    cursor.execute("""
         UPDATE orders
         SET status='Approved'
         WHERE order_number=?
@@ -646,6 +707,8 @@ def approve_order(order_number):
 
     conn.commit()
     conn.close()
+
+    return True
 
 
 def reject_order(order_number):
@@ -684,6 +747,26 @@ def get_order(order_number):
     conn.close()
 
     return row
+
+def get_order_items(order_number):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            product_id,
+            product_name,
+            quantity
+        FROM order_items
+        WHERE order_number=?
+    """, (order_number,))
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
+    
 def increase_cart(telegram_id, product_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -742,16 +825,6 @@ def remove_cart_item(telegram_id, product_id):
 
     conn.commit()
     conn.close()
-
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS order_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_number INTEGER,
-        product_id TEXT,
-        product_name TEXT,
-        quantity INTEGER
-    )
-""")
 
 
 init_db()
