@@ -24,6 +24,7 @@ from shop import (
     shop,
     shop_category,
     shop_type,
+    back_to_shop_type,
     product_page,
     add_cart,
     continue_shop,
@@ -310,6 +311,12 @@ app.add_handler(
     CallbackQueryHandler(
         shop_type,
         pattern="^shop_(ready|preorder)$",
+    )
+)
+app.add_handler(
+    CallbackQueryHandler(
+        back_to_shop_type,
+        pattern="^back_shop_type$",
     )
 )
 
