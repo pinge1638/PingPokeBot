@@ -564,7 +564,7 @@ def clear_cart(telegram_id):
 def create_order(
     telegram_id,
     username,
-    items,
+    cart,
     subtotal,
     shipping,
     total,
@@ -609,6 +609,24 @@ def create_order(
         total,
         delivery,
         "Pending Verification",
+    ))
+
+    for product_id, name, price, quantity in cart:
+
+    cursor.execute("""
+        INSERT INTO order_items
+        (
+            order_number,
+            product_id,
+            product_name,
+            quantity
+        )
+        VALUES (?, ?, ?, ?)
+    """, (
+        order_number,
+        product_id,
+        name,
+        quantity,
     ))
 
     conn.commit()
@@ -724,6 +742,16 @@ def remove_cart_item(telegram_id, product_id):
 
     conn.commit()
     conn.close()
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS order_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_number INTEGER,
+        product_id TEXT,
+        product_name TEXT,
+        quantity INTEGER
+    )
+""")
 
 
 init_db()
