@@ -69,9 +69,10 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "shop_ready":
         product_type = "Ready Stock"
-
     else:
         product_type = "Preorder"
+    
+    context.user_data["shop_product_type"] = product_type
 
     category = context.user_data["shop_category"]
 
@@ -101,6 +102,55 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not keyboard:
         await query.edit_message_text(
+            "❌ No products available."
+        )
+        return
+
+    await query.edit_message_text(
+        f"📦 {category}\n{product_type}\n\nChoose a product:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+
+async def back_to_products(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    category = context.user_data.get("shop_category")
+    product_type = context.user_data.get("shop_product_type")
+
+    if not category or not product_type:
+        await query.edit_message_text(
+            "❌ Unable to return to products."
+        )
+        return
+
+    rows = get_products()
+
+    keyboard = []
+
+    for product_id, name, cat, ptype, cost, price, stock in rows:
+
+        if cat != category:
+            continue
+
+        if ptype != product_type:
+            continue
+
+        if stock <= 0:
+            continue
+
+        keyboard.append([
+            InlineKeyboardButton(
+                f"{name} • ${price:.2f} • Stock {stock}",
+                callback_data=f"product_{product_id}"
+            )
+        ])
+
+    if not keyboard:
+        await query.edit_message_text(
+            f"📦 {category}\n{product_type}\n\n"
             "❌ No products available."
         )
         return
@@ -179,6 +229,12 @@ async def choose_quantity(update, context):
             InlineKeyboardButton(
                 "🛒 Add to Cart",
                 callback_data="cart_add",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "⬅️ Back",
+                callback_data="back_products",
             )
         ]
     ]
