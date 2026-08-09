@@ -203,6 +203,31 @@ async def add_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     qty = context.user_data["selected_quantity"]
 
+    product = get_product_details(product_id)
+
+    if not product:
+        await query.answer(
+            "❌ Product not found.",
+            show_alert=True,
+        )
+        return
+
+    stock = product[6]
+
+    current_cart_qty = get_cart_quantity(
+        query.from_user.id,
+        product_id,
+    )
+
+    remaining = stock - current_cart_qty
+
+    if qty > remaining:
+        await query.answer(
+            f"❌ You can only add {remaining} more.",
+            show_alert=True,
+        )
+        return
+
     add_to_cart(
         query.from_user.id,
         product_id,
@@ -286,6 +311,29 @@ async def plus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     product_id = query.data.replace("plus_", "")
+
+    product = get_product_details(product_id)
+
+    if not product:
+        await query.answer(
+            "❌ Product not found.",
+            show_alert=True,
+        )
+        return
+
+    stock = product[6]
+
+    cart_qty = get_cart_quantity(
+        query.from_user.id,
+        product_id,
+    )
+
+    if cart_qty >= stock:
+        await query.answer(
+            f"❌ Maximum stock reached: {stock}",
+            show_alert=True,
+        )
+        return
 
     increase_cart(
         query.from_user.id,
