@@ -1,5 +1,7 @@
 import sqlite3
 
+from google_sheets import get_products
+
 DB_NAME = "tickets.db"
 
 def all_tickets():
@@ -507,19 +509,34 @@ def get_cart(telegram_id):
 
     cursor.execute("""
         SELECT
-            cart.product_id,
-            products.name,
-            products.price,
-            cart.quantity
+            product_id,
+            quantity
         FROM cart
-        JOIN products
-        ON cart.product_id = products.product_id
         WHERE telegram_id=?
     """, (telegram_id,))
 
-    rows = cursor.fetchall()
+    cart_rows = cursor.fetchall()
 
     conn.close()
+
+    products = get_products()
+
+    rows = []
+
+    for product_id, quantity in cart_rows:
+
+        for product in products:
+
+            if product["product_id"] == product_id:
+
+                rows.append((
+                    product["product_id"],
+                    product["name"],
+                    product["price"],
+                    quantity,
+                ))
+
+                break
 
     return rows
 
