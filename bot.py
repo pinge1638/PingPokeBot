@@ -314,12 +314,14 @@ app.add_handler(
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, anti_spam))
 app.add_handler(CommandHandler("admin", admin))
 app.add_handler(CommandHandler("products", products))
+
 app.add_handler(
     CallbackQueryHandler(
         admin_buttons,
-        pattern="^(inventory|orders|preorders|payments|giveaway|reports|settings|back_admin)$"
+        pattern="^(inventory|orders|preorders|payments|giveaway|reports|settings|back_admin|orders_pending|orders_approved|orders_rejected)$"
     )
 )
+
 app.add_handler(
     CallbackQueryHandler(
         product_page,
