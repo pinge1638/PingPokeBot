@@ -6,7 +6,7 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 import config
-
+from database import get_orders_by_status
 
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -68,16 +68,57 @@ async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🗑 Hide Product", callback_data="hide_product")],
             [InlineKeyboardButton("⬅ Back", callback_data="back_admin")],
         ]
-
+    
         await query.edit_message_text(
             "📦 *Inventory Management*\n\nChoose an option.",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown",
         )
-
-
+    
+    
+    elif query.data == "orders":
+    
+        pending = get_orders_by_status("Pending Verification")
+        approved = get_orders_by_status("Approved")
+        rejected = get_orders_by_status("Rejected")
+    
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    f"🟡 Pending Verification ({len(pending)})",
+                    callback_data="orders_pending",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    f"🟢 Approved ({len(approved)})",
+                    callback_data="orders_approved",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    f"🔴 Rejected ({len(rejected)})",
+                    callback_data="orders_rejected",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "⬅ Back",
+                    callback_data="back_admin",
+                )
+            ],
+        ]
+    
+        await query.edit_message_text(
+            "🛒 *Order Management*\n\n"
+            "Choose an order status.",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
+    
+    
     elif query.data == "back_admin":
-
+    
         keyboard = [
             [InlineKeyboardButton("📦 Inventory", callback_data="inventory")],
             [InlineKeyboardButton("🛒 Orders", callback_data="orders")],
@@ -87,7 +128,7 @@ async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("📊 Reports", callback_data="reports")],
             [InlineKeyboardButton("⚙️ Settings", callback_data="settings")],
         ]
-
+    
         await query.edit_message_text(
             "🛠 *PingPoke Admin Panel*\n\n"
             "Select a module below.",
