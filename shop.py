@@ -127,9 +127,56 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❌ No products available."
         )
         return
-
+    
+    keyboard.append([
+        InlineKeyboardButton(
+            "⬅️ Back",
+            callback_data="back_shop_type",
+        )
+    ])
+    
     await query.edit_message_text(
         f"📦 {category}\n{product_type}\n\nChoose a product:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def back_to_shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    category = context.user_data.get("shop_category")
+
+    if not category:
+        await query.edit_message_text(
+            "❌ Unable to return."
+        )
+        return
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "📦 Ready Stock",
+                callback_data="shop_ready",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "🚢 Preorder",
+                callback_data="shop_preorder",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "⬅️ Back",
+                callback_data="shop_back_category",
+            )
+        ],
+    ]
+
+    await query.edit_message_text(
+        f"📂 {category}\n\n"
+        "Choose Product Type",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
