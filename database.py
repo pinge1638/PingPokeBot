@@ -461,14 +461,6 @@ def add_to_cart(
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT stock
-        FROM products
-        WHERE product_id=?
-    """, (product_id,))
-
-    stock = cursor.fetchone()[0]
-
-    cursor.execute("""
         SELECT quantity
         FROM cart
         WHERE telegram_id=? AND product_id=?
@@ -478,12 +470,6 @@ def add_to_cart(
     ))
 
     row = cursor.fetchone()
-
-    current = row[0] if row else 0
-
-    if current + quantity > stock:
-        conn.close()
-        return False
 
     if row:
         cursor.execute("""
