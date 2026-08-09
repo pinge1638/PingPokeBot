@@ -48,8 +48,8 @@ def get_products():
             "description": str(row["Description"]),
             "category": str(row["Category"]),
             "type": str(row["Type"]),
-            "cost": float(row["Cost"]),
-            "price": float(row["Price"]),
+            "cost": float(str(row["Cost"]).replace("$", "").replace(",", "").strip()),
+            "price": float(str(row["Price"]).replace("$", "").replace(",", "").strip()),
             "stock": int(row["Stock"]),
         })
 
