@@ -652,9 +652,13 @@ def create_order(
     return order_number
 
 def approve_order(order_number):
+    from google_sheets import get_products
+    from google_sheets import update_stock
+
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
+    # Check order
     cursor.execute("""
         SELECT status
         FROM orders
@@ -667,10 +671,12 @@ def approve_order(order_number):
         conn.close()
         return False
 
+    # Don't approve twice
     if order[0] == "Approved":
         conn.close()
         return False
 
+    # Get ordered items
     cursor.execute("""
         SELECT product_id, quantity
         FROM order_items
@@ -679,29 +685,35 @@ def approve_order(order_number):
 
     items = cursor.fetchall()
 
+    # Get current Google Sheets inventory
+    products = get_products()
+
+    stock_map = {
+        product["product_id"]: product["stock"]
+        for product in products
+    }
+
+    # Check every item has enough stock
     for product_id, quantity in items:
-        cursor.execute("""
-            SELECT stock
-            FROM products
-            WHERE product_id=?
-        """, (product_id,))
 
-        row = cursor.fetchone()
+        current_stock = stock_map.get(product_id)
 
-        if not row or row[0] < quantity:
+        if current_stock is None:
             conn.close()
             return False
 
-    for product_id, quantity in items:
-        cursor.execute("""
-            UPDATE products
-            SET stock = stock - ?
-            WHERE product_id=?
-        """, (
-            quantity,
-            product_id,
-        ))
+        if current_stock < quantity:
+            conn.close()
+            return False
 
+    # Reduce Google Sheets stock
+    for product_id, quantity in items:
+        update_stock(
+            product_id,
+            -quantity,
+        )
+
+    # Mark order approved
     cursor.execute("""
         UPDATE orders
         SET status='Approved'
