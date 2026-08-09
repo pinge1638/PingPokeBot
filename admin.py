@@ -116,6 +116,152 @@ async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="Markdown",
         )
     
+    elif query.data == "orders_pending":
+
+        orders = get_orders_by_status("Pending Verification")
+    
+        if not orders:
+            await query.edit_message_text(
+                "🟡 *Pending Verification*\n\n"
+                "No pending orders.",
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton(
+                            "⬅ Back",
+                            callback_data="orders",
+                        )
+                    ]
+                ]),
+                parse_mode="Markdown",
+            )
+            return
+    
+        keyboard = []
+    
+        for order in orders:
+    
+            order_number = order[0]
+            username = order[2]
+            total = order[6]
+    
+            keyboard.append([
+                InlineKeyboardButton(
+                    f"🟡 #{order_number} • @{username} • ${total:.2f}",
+                    callback_data=f"vieworder_{order_number}",
+                )
+            ])
+    
+        keyboard.append([
+            InlineKeyboardButton(
+                "⬅ Back",
+                callback_data="orders",
+            )
+        ])
+    
+        await query.edit_message_text(
+            "🟡 *Pending Verification*\n\n"
+            "Select an order:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
+
+    elif query.data == "orders_approved":
+
+        orders = get_orders_by_status("Approved")
+    
+        if not orders:
+            await query.edit_message_text(
+                "🟢 *Approved Orders*\n\n"
+                "No approved orders.",
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton(
+                            "⬅ Back",
+                            callback_data="orders",
+                        )
+                    ]
+                ]),
+                parse_mode="Markdown",
+            )
+            return
+    
+        keyboard = []
+    
+        for order in orders:
+    
+            order_number = order[0]
+            username = order[2]
+            total = order[6]
+    
+            keyboard.append([
+                InlineKeyboardButton(
+                    f"🟢 #{order_number} • @{username} • ${total:.2f}",
+                    callback_data=f"vieworder_{order_number}",
+                )
+            ])
+    
+        keyboard.append([
+            InlineKeyboardButton(
+                "⬅ Back",
+                callback_data="orders",
+            )
+        ])
+    
+        await query.edit_message_text(
+            "🟢 *Approved Orders*\n\n"
+            "Select an order:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
+
+    elif query.data == "orders_rejected":
+
+        orders = get_orders_by_status("Rejected")
+    
+        if not orders:
+            await query.edit_message_text(
+                "🔴 *Rejected Orders*\n\n"
+                "No rejected orders.",
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton(
+                            "⬅ Back",
+                            callback_data="orders",
+                        )
+                    ]
+                ]),
+                parse_mode="Markdown",
+            )
+            return
+    
+        keyboard = []
+    
+        for order in orders:
+    
+            order_number = order[0]
+            username = order[2]
+            total = order[6]
+    
+            keyboard.append([
+                InlineKeyboardButton(
+                    f"🔴 #{order_number} • @{username} • ${total:.2f}",
+                    callback_data=f"vieworder_{order_number}",
+                )
+            ])
+    
+        keyboard.append([
+            InlineKeyboardButton(
+                "⬅ Back",
+                callback_data="orders",
+            )
+        ])
+
+        await query.edit_message_text(
+            "🔴 *Rejected Orders*\n\n"
+            "Select an order:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
     
     elif query.data == "back_admin":
     
