@@ -55,6 +55,27 @@ def get_products():
 
     return products
 
+def update_stock(product_id, change):
+    sheet = get_sheet()
+
+    rows = sheet.get_all_records()
+
+    for row_number, row in enumerate(rows, start=2):
+
+        if str(row["Product ID"]) == str(product_id):
+
+            current_stock = int(row["Stock"])
+            new_stock = current_stock + change
+
+            if new_stock < 0:
+                return False
+
+            sheet.update_cell(row_number, 8, new_stock)
+
+            return True
+
+    return False
+
 
 if __name__ == "__main__":
     products = get_products()
