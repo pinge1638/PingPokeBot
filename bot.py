@@ -11,6 +11,7 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+from google_sheets import get_products
 
 import config
 
@@ -439,6 +440,19 @@ async def error_handler(update, context):
     print("ERROR:", context.error)
 
 app.add_error_handler(error_handler)
+
+try:
+    products = get_products()
+
+    print("GOOGLE SHEETS TEST SUCCESS")
+    print(f"Products found: {len(products)}")
+
+    for product in products:
+        print(product)
+
+except Exception as e:
+    print("GOOGLE SHEETS TEST FAILED")
+    print(repr(e))
 
 print("PingPokeBot running...")
 app.run_polling(
