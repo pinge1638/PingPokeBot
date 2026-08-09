@@ -1,6 +1,6 @@
 import sqlite3
 
-from google_sheets import get_products
+from google_sheets import get_products as get_sheet_products
 
 DB_NAME = "tickets.db"
 
@@ -519,7 +519,7 @@ def get_cart(telegram_id):
 
     conn.close()
 
-    products = get_products()
+    products = get_sheet_products()
 
     rows = []
 
