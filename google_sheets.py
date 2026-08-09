@@ -14,6 +14,7 @@ def get_sheet():
         "type": "service_account",
         "client_email": os.getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL"),
         "private_key": private_key.replace("\\n", "\n"),
+        "token_uri": "https://oauth2.googleapis.com/token",
     }
 
     credentials = Credentials.from_service_account_info(
