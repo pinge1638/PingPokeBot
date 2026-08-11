@@ -652,6 +652,8 @@ async def paynow(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Please make payment using the QR Code.
 
+📱 PayNow Number: 98576158
+
 ⚠️ IMPORTANT
 
 Please screenshot your payment after transferring.
