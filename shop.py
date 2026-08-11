@@ -587,19 +587,27 @@ async def delivery_method(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = "📋 Order Summary\n\n"
 
     subtotal = 0
+    preorder_subtotal = 0
+    ready_stock_subtotal = 0
 
     for product_id, name, old_price, qty in cart:
 
         product = get_product_details(product_id)
-    
+
         if not product:
             continue
-    
+
         current_price = product[5]
-    
+        product_type = product[3]
+
         line_total = current_price * qty
         subtotal += line_total
-    
+
+        if product_type == "Preorder":
+            preorder_subtotal += line_total
+        else:
+            ready_stock_subtotal += line_total
+
         text += (
             f"📦 {name}\n"
             f"x{qty} • ${line_total:.2f}\n\n"
@@ -607,13 +615,33 @@ async def delivery_method(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     total = subtotal + shipping
 
+    preorder_deposit = preorder_subtotal * 0.50
+
+    payment_due = (
+        ready_stock_subtotal
+        + preorder_deposit
+        + shipping
+    )
+    context.user_data["order_total"] = total
+    context.user_data["payment_due"] = payment_due
+
     text += (
         "──────────────\n"
         f"Subtotal: ${subtotal:.2f}\n"
         f"Delivery: {context.user_data['delivery']}\n"
-        f"Shipping: ${shipping:.2f}\n\n"
-        f"💰 Total: ${total:.2f}"
+        f"Shipping: ${shipping:.2f}\n"
     )
+
+    if preorder_subtotal > 0:
+        text += (
+            f"\n🚢 Preorder Deposit (50%): "
+            f"${preorder_deposit:.2f}\n"
+            f"💳 Payment Due Now: ${payment_due:.2f}"
+        )
+    else:
+        text += (
+            f"\n💰 Total: ${payment_due:.2f}"
+        )
 
     keyboard = [
         [
@@ -821,7 +849,15 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
         "Unknown",
     )
 
-    total = subtotal + shipping
+    payment_due = context.user_data.get(
+        "payment_due",
+        subtotal + shipping,
+    )
+    
+    order_total = context.user_data.get(
+        "order_total",
+        subtotal + shipping,
+    )
 
     # =========================
     # FIND AMOUNT IN SCREENSHOT
@@ -846,14 +882,14 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
             pass
 
     print("OCR amounts:", screenshot_amounts)
-    print("Expected total:", total)
+    print("Expected payment:", payment_due)
 
     # =========================
     # CHECK AMOUNT
     # =========================
 
     amount_matches_order = any(
-        abs(amount - total) < 0.01
+        abs(amount - payment_due) < 0.01
         for amount in screenshot_amounts
     )
 
@@ -866,7 +902,7 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if not amount_matches_order:
             reason = (
                 f"We could not find the correct payment amount "
-                f"(${total:.2f}) in the screenshot."
+                f"(${payment_due:.2f}) in the screenshot."
             )
 
         else:
@@ -896,7 +932,7 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
         cart,
         subtotal,
         shipping,
-        total,
+        order_total,
         delivery,
     )
 
@@ -943,12 +979,8 @@ Items:
 
 Subtotal: ${subtotal:.2f}
 Shipping: ${shipping:.2f}
-Total: ${total:.2f}
-
-Delivery:
-{delivery}
-
-🔎 OCR payment check passed.
+Total: ${order_total:.2f}
+Payment Received: ${payment_due:.2f}
 """,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
