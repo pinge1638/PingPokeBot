@@ -389,7 +389,7 @@ async def continue_shop(update, context):
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-async def show_cart(query):
+async def show_cart(query, products=None):
 
     cart = get_cart(query.from_user.id)
 
@@ -398,14 +398,23 @@ async def show_cart(query):
     total = 0
     keyboard = []
 
+    # Get products only once
+    if products is None:
+        products = get_products()
+
+    product_map = {
+        product["product_id"]: product
+        for product in products
+    }
+
     for product_id, name, old_price, qty in cart:
 
-        product = get_product_details(product_id)
+        product = product_map.get(product_id)
 
         if not product:
             continue
 
-        current_price = product[5]
+        current_price = product["price"]
 
         subtotal = current_price * qty
         total += subtotal
@@ -520,7 +529,16 @@ async def plus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     product_id = query.data.replace("plus_", "")
 
-    product = get_product_details(product_id)
+    # Get products ONCE
+    products = get_products()
+
+    product = next(
+        (
+            p for p in products
+            if p["product_id"] == product_id
+        ),
+        None,
+    )
 
     if not product:
         await query.answer(
@@ -529,7 +547,7 @@ async def plus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    stock = product[6]
+    stock = product["stock"]
 
     cart_qty = get_cart_quantity(
         query.from_user.id,
@@ -548,7 +566,8 @@ async def plus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
         product_id,
     )
 
-    await show_cart(query)
+    # Reuse the products we already loaded
+    await show_cart(query, products)
 
 
 async def minus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -563,7 +582,9 @@ async def minus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
         product_id,
     )
 
-    await show_cart(query)
+    products = get_products()
+
+    await show_cart(query, products)
 
 
 async def delete_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -578,7 +599,9 @@ async def delete_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
         product_id,
     )
 
-    await show_cart(query)
+    products = get_products()
+
+    await show_cart(query, products)
 
 
 async def checkout(update: Update, context: ContextTypes.DEFAULT_TYPE):
