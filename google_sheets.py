@@ -2,12 +2,15 @@ import os
 import gspread
 from google.oauth2.service_account import Credentials
 
+
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
 
-def get_sheet():
+
+def get_spreadsheet():
+
     private_key = os.getenv("GOOGLE_PRIVATE_KEY")
 
     credentials_info = {
@@ -24,21 +27,33 @@ def get_sheet():
 
     client = gspread.authorize(credentials)
 
-    sheet = client.open_by_key(
+    return client.open_by_key(
         os.getenv("GOOGLE_SHEET_ID")
     )
 
-    return sheet.worksheet("Products")
+
+def get_sheet():
+
+    spreadsheet = get_spreadsheet()
+
+    return spreadsheet.worksheet("Products")
 
 
 def get_products():
-    sheet = get_sheet()
 
-    rows = sheet.get_all_records()
+    spreadsheet = get_spreadsheet()
 
     products = []
 
-    for row in rows:
+    # =========================
+    # READY STOCK
+    # =========================
+
+    ready_sheet = spreadsheet.worksheet("Products")
+    ready_rows = ready_sheet.get_all_records()
+
+    for row in ready_rows:
+
         if str(row.get("Hidden", "NO")).upper() == "YES":
             continue
 
@@ -47,15 +62,60 @@ def get_products():
             "name": str(row["Name"]),
             "description": str(row["Description"]),
             "category": str(row["Category"]),
-            "type": str(row["Type"]),
-            "cost": float(str(row["Cost"]).replace("$", "").replace(",", "").strip()),
-            "price": float(str(row["Price"]).replace("$", "").replace(",", "").strip()),
+            "type": "Ready Stock",
+            "cost": float(
+                str(row["Cost"])
+                .replace("$", "")
+                .replace(",", "")
+                .strip()
+            ),
+            "price": float(
+                str(row["Price"])
+                .replace("$", "")
+                .replace(",", "")
+                .strip()
+            ),
+            "stock": int(row["Stock"]),
+        })
+
+    # =========================
+    # PREORDERS
+    # =========================
+
+    preorder_sheet = spreadsheet.worksheet("Preorders")
+    preorder_rows = preorder_sheet.get_all_records()
+
+    for row in preorder_rows:
+
+        if str(row.get("Hidden", "NO")).upper() == "YES":
+            continue
+
+        products.append({
+            "product_id": str(row["Product ID"]),
+            "name": str(row["Name"]),
+            "description": str(row["Description"]),
+            "category": str(row["Category"]),
+            "type": "Preorder",
+            "cost": float(
+                str(row["Cost"])
+                .replace("$", "")
+                .replace(",", "")
+                .strip()
+            ),
+            "price": float(
+                str(row["Price"])
+                .replace("$", "")
+                .replace(",", "")
+                .strip()
+            ),
             "stock": int(row["Stock"]),
         })
 
     return products
 
+
 def update_stock(product_id, change):
+
     sheet = get_sheet()
 
     rows = sheet.get_all_records()
@@ -70,7 +130,11 @@ def update_stock(product_id, change):
             if new_stock < 0:
                 return False
 
-            sheet.update_cell(row_number, 8, new_stock)
+            sheet.update_cell(
+                row_number,
+                8,
+                new_stock,
+            )
 
             return True
 
@@ -78,6 +142,7 @@ def update_stock(product_id, change):
 
 
 if __name__ == "__main__":
+
     products = get_products()
 
     for product in products:
