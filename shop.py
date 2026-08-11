@@ -1,3 +1,9 @@
+import re
+from io import BytesIO
+
+from PIL import Image
+import pytesseract
+
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -737,9 +743,97 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     photo = update.message.photo[-1]
 
-    context.user_data["payment_photo"] = photo.file_id
+    # =========================
+    # DOWNLOAD IMAGE
+    # =========================
+
+    telegram_file = await context.bot.get_file(photo.file_id)
+
+    image_bytes = await telegram_file.download_as_bytearray()
+
+    image = Image.open(BytesIO(image_bytes))
+
+    # =========================
+    # OCR
+    # =========================
+
+    try:
+        ocr_text = pytesseract.image_to_string(image)
+
+    except Exception as e:
+        print("OCR ERROR:", repr(e))
+
+        await update.message.reply_text(
+            "⚠️ We could not read this image.\n\n"
+            "Please upload a clear screenshot of your payment confirmation."
+        )
+
+        return WAIT_PAYMENT
+
+    ocr_text_lower = ocr_text.lower()
+
+    print("===== PAYMENT OCR =====")
+    print(ocr_text)
+    print("=======================")
+
+    # =========================
+    # REJECT PERSONAL QR CODES
+    # =========================
+
+    qr_rejection_phrases = [
+        "share your personal qr code",
+        "receive payments",
+        "personal qr code",
+        "your qr code is linked",
+        "qr code is linked to your paynow profile",
+    ]
+
+    if any(
+        phrase in ocr_text_lower
+        for phrase in qr_rejection_phrases
+    ):
+        await update.message.reply_text(
+            "❌ This does not appear to be a payment receipt.\n\n"
+            "Please upload the screenshot showing your completed "
+            "payment/transfer instead of the PayNow QR code."
+        )
+
+        return WAIT_PAYMENT
+
+    # =========================
+    # PAYMENT RECEIPT KEYWORDS
+    # =========================
+
+    payment_keywords = [
+        "paid",
+        "payment successful",
+        "payment completed",
+        "transfer successful",
+        "transfer completed",
+        "transaction",
+        "transaction id",
+        "reference number",
+    ]
+    
+    keyword_matches = sum(
+        1
+        for keyword in payment_keywords
+        if keyword in ocr_text_lower
+    )
+    
+    has_sgd = "sgd" in ocr_text_lower
+
+    # =========================
+    # GET CART / ORDER TOTAL
+    # =========================
 
     cart = get_cart(update.effective_user.id)
+
+    if not cart:
+        await update.message.reply_text(
+            "❌ Your cart is empty."
+        )
+        return ConversationHandler.END
 
     items = ""
 
@@ -748,19 +842,90 @@ async def payment_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE)
     for product_id, name, old_price, qty in cart:
 
         product = get_product_details(product_id)
-    
+
         if not product:
             continue
-    
+
         current_price = product[5]
-    
+
         items += f"{name} x{qty}\n"
+
         subtotal += current_price * qty
 
-    shipping = context.user_data["shipping"]
-    delivery = context.user_data["delivery"]
+    shipping = context.user_data.get("shipping", 0)
+    delivery = context.user_data.get(
+        "delivery",
+        "Unknown",
+    )
 
     total = subtotal + shipping
+
+    # =========================
+    # FIND AMOUNT IN SCREENSHOT
+    # =========================
+
+    amount_matches = re.findall(
+        r"(?:sgd\s*)?(\d{1,6}(?:,\d{3})*(?:\.\d{2})?)\s*(?:sgd)?",
+        ocr_text_lower,
+    )
+
+    screenshot_amounts = []
+
+    for amount in amount_matches:
+        try:
+            value = float(
+                amount.replace(",", "")
+            )
+
+            screenshot_amounts.append(value)
+
+        except ValueError:
+            pass
+
+    print("OCR amounts:", screenshot_amounts)
+    print("Expected total:", total)
+
+    # =========================
+    # CHECK AMOUNT
+    # =========================
+
+    amount_matches_order = any(
+        abs(amount - total) < 0.01
+        for amount in screenshot_amounts
+    )
+
+    # =========================
+    # VALIDATE PAYMENT RECEIPT
+    # =========================
+
+    if keyword_matches < 1 or not has_sgd or not amount_matches_order:
+
+        if not amount_matches_order:
+            reason = (
+                f"We could not find the correct payment amount "
+                f"(${total:.2f}) in the screenshot."
+            )
+
+        else:
+            reason = (
+                "The image does not appear to be a payment "
+                "confirmation."
+            )
+
+        await update.message.reply_text(
+            "❌ Payment screenshot rejected.\n\n"
+            f"{reason}\n\n"
+            "Please upload the screenshot showing your "
+            "completed PayNow payment."
+        )
+
+        return WAIT_PAYMENT
+
+    # =========================
+    # PAYMENT SCREENSHOT PASSED
+    # =========================
+
+    context.user_data["payment_photo"] = photo.file_id
 
     order_number = create_order(
         update.effective_user.id,
@@ -803,24 +968,28 @@ We will notify you once payment has been confirmed.
         chat_id=OWNER_ID,
         photo=photo.file_id,
         caption=f"""
-    🛒 NEW ORDER
-    
-    Order #{order_number}
-    
-    Customer:
-    @{update.effective_user.username}
-    
-    Items:
-    {items}
-    
-    Subtotal: ${subtotal:.2f}
-    Shipping: ${shipping:.2f}
-    Total: ${total:.2f}
-    
-    Delivery:
-    {delivery}
-    """,
+🛒 NEW ORDER
+
+Order #{order_number}
+
+Customer:
+@{update.effective_user.username}
+
+Items:
+{items}
+
+Subtotal: ${subtotal:.2f}
+Shipping: ${shipping:.2f}
+Total: ${total:.2f}
+
+Delivery:
+{delivery}
+
+🔎 OCR payment check passed.
+""",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
     clear_cart(update.effective_user.id)
+
     return ConversationHandler.END
