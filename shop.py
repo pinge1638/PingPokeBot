@@ -460,68 +460,6 @@ async def show_cart(query, products=None):
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-async def show_cart(query):
-
-    cart = get_cart(query.from_user.id)
-
-    text = "🛒 Your Cart\n\n"
-
-    total = 0
-    keyboard = []
-
-    for product_id, name, old_price, qty in cart:
-
-        product = get_product_details(product_id)
-
-        if not product:
-            continue
-
-        current_price = product[5]
-
-        subtotal = current_price * qty
-        total += subtotal
-
-        text += (
-            f"📦 {name}\n"
-            f"x{qty} • ${subtotal:.2f}\n\n"
-        )
-
-        keyboard.append([
-            InlineKeyboardButton(
-                "➖",
-                callback_data=f"minus_{product_id}",
-            ),
-            InlineKeyboardButton(
-                "➕",
-                callback_data=f"plus_{product_id}",
-            ),
-            InlineKeyboardButton(
-                "🗑",
-                callback_data=f"delete_{product_id}",
-            ),
-        ])
-
-    text += f"💰 Total: ${total:.2f}"
-
-    keyboard.append([
-        InlineKeyboardButton(
-            "🛍 Continue Shopping",
-            callback_data="continue_shop",
-        )
-    ])
-
-    keyboard.append([
-        InlineKeyboardButton(
-            "💳 Checkout",
-            callback_data="checkout",
-        )
-    ])
-
-    await query.edit_message_text(
-        text,
-        reply_markup=InlineKeyboardMarkup(keyboard),
-    )
-
 async def plus_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
