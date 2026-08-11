@@ -675,9 +675,9 @@ async def paynow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-payment_due = context.user_data.get("payment_due", 0)
+    payment_due = context.user_data.get("payment_due", 0)
 
-text = f"""
+    text = f"""
 💳 PayNow Payment
 
 Please make payment using the QR Code.
