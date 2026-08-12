@@ -86,48 +86,71 @@ async def shop_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("SHOP TYPE BUTTON PRESSED:", update.callback_query.data)
-    
+
+    print("========== SHOP TYPE START ==========")
+
     query = update.callback_query
+
+    print("1. CALLBACK:", query.data)
+
     await query.answer()
+
+    print("2. CALLBACK ANSWERED")
 
     if query.data == "shop_ready":
         product_type = "Ready Stock"
     else:
         product_type = "Preorder"
-    
+
+    print("3. PRODUCT TYPE:", product_type)
+
     context.user_data["shop_product_type"] = product_type
 
-    category = context.user_data["shop_category"]
+    category = context.user_data.get("shop_category")
+
+    print("4. CATEGORY:", category)
+
+    if not category:
+        print("ERROR: NO SHOP CATEGORY")
+        await query.edit_message_text(
+            "❌ Please start the shop again with /shop."
+        )
+        return
+
+    print("5. ABOUT TO LOAD PRODUCTS")
 
     products = get_products()
-    print("===== SHOP TYPE DEBUG =====")
-    print("BUTTON:", query.data)
-    print("CATEGORY:", category)
-    print("PRODUCT TYPE:", product_type)
-    print("PRODUCTS:", products)
-    print("===========================")
+
+    print("6. PRODUCTS LOADED:", len(products))
 
     keyboard = []
-    
+
     for product in products:
-    
+
         product_id = product["product_id"]
         name = product["name"]
         cat = product["category"]
         ptype = product["type"]
         price = product["price"]
         stock = product["stock"]
-    
+
+        print(
+            "PRODUCT:",
+            name,
+            "| CATEGORY:", cat,
+            "| TYPE:", ptype,
+            "| STOCK:", stock
+        )
+
         if cat != category:
             continue
-    
+
         if ptype != product_type:
             continue
-    
+
         if stock <= 0:
             continue
-    
+
         keyboard.append([
             InlineKeyboardButton(
                 f"{name} • ${price:.2f} • Stock {stock}",
@@ -135,23 +158,33 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         ])
 
+    print("7. MATCHING PRODUCTS:", len(keyboard))
+
     if not keyboard:
+        print("8. NO MATCHING PRODUCTS")
+
         await query.edit_message_text(
-            "❌ No products available."
+            f"❌ No {product_type} products available."
         )
         return
-    
+
     keyboard.append([
         InlineKeyboardButton(
             "⬅️ Back",
             callback_data="back_shop_type",
         )
     ])
-    
+
+    print("9. EDITING MESSAGE")
+
     await query.edit_message_text(
-        f"📦 {category}\n{product_type}\n\nChoose a product:",
+        f"📦 {category}\n"
+        f"{product_type}\n\n"
+        "Choose a product:",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+    print("10. SHOP TYPE COMPLETE")
 
 async def back_to_shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
