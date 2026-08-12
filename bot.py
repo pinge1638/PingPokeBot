@@ -307,21 +307,6 @@ app.add_handler(
     )
 )
 
-async def debug_shop_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-
-    print("🔥 CALLBACK RECEIVED:", query.data)
-
-    await query.answer("Callback received!")
-
-
-app.add_handler(
-    CallbackQueryHandler(
-        debug_shop_callback,
-        pattern="^shop_(ready|preorder)$",
-    )
-)
-
 app.add_handler(
     CallbackQueryHandler(
         shop_type,
