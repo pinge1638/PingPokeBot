@@ -1,3 +1,4 @@
+import asyncio
 import re
 from io import BytesIO
 
@@ -119,7 +120,7 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print("5. ABOUT TO LOAD PRODUCTS")
 
-    products = get_products()
+    products = await asyncio.to_thread(get_products)
 
     print("6. PRODUCTS LOADED:", len(products))
 
