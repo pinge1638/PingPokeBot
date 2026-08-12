@@ -380,6 +380,13 @@ app.add_handler(
         pattern="^paynow$",
     )
 )
+
+async def cancel_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "❌ Payment cancelled."
+    )
+    return ConversationHandler.END
+    
 payment_conv = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
@@ -387,6 +394,7 @@ payment_conv = ConversationHandler(
             pattern="^paid$",
         )
     ],
+
     states={
         WAIT_PAYMENT: [
             MessageHandler(
@@ -395,8 +403,12 @@ payment_conv = ConversationHandler(
             )
         ]
     },
-    fallbacks=[],
+
+    fallbacks=[
+        CommandHandler("cancel", cancel_payment)
+    ],
 )
+
 app.add_handler(payment_conv)
 app.add_handler(
     CallbackQueryHandler(
