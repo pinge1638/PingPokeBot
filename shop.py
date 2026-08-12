@@ -101,6 +101,12 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     category = context.user_data["shop_category"]
 
     products = get_products()
+    print("===== SHOP TYPE DEBUG =====")
+    print("BUTTON:", query.data)
+    print("CATEGORY:", category)
+    print("PRODUCT TYPE:", product_type)
+    print("PRODUCTS:", products)
+    print("===========================")
 
     keyboard = []
     
