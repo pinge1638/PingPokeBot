@@ -298,8 +298,8 @@ app.add_handler(product_conv)
 app.add_handler(stock_conv)
 app.add_handler(remove_stock_conv)
 app.add_handler(sell_conv)
-app.add_handler(CommandHandler("shop", shop))
 
+app.add_handler(CommandHandler("shop", shop))
 app.add_handler(
     CallbackQueryHandler(
         shop_category,
