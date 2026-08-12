@@ -86,7 +86,8 @@ async def shop_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    print("SHOP TYPE BUTTON PRESSED:", update.callback_query.data)
+    
     query = update.callback_query
     await query.answer()
 
