@@ -152,9 +152,14 @@ async def shop_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if stock <= 0:
             continue
 
+        display_name = name
+
+        if len(display_name) > 28:
+            display_name = display_name[:28] + "..."
+        
         keyboard.append([
             InlineKeyboardButton(
-                f"{name} • ${price:.2f} • Stock {stock}",
+                f"{display_name} • ${price:.2f} • Stock {stock}",
                 callback_data=f"product_{product_id}"
             )
         ])
